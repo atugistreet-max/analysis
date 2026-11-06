@@ -44,7 +44,7 @@
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
           <span>📊</span> マイアプリ アクセス解析ダッシュボード
         </h1>
-        <p class="text-xs sm:text-sm text-indigo-200 mt-0.5">スプレッドシート＆GA4実測データに基づく正確なアクセス分析</p>
+        <p class="text-xs sm:text-sm text-indigo-200 mt-0.5">全5アプリ（健康管理・財務管理・自分史・ニュース・ムスリム問題ウォッチ）の統合分析</p>
       </div>
       <div class="flex items-center gap-2 self-end sm:self-auto">
         <span id="sync-status" class="text-xs bg-slate-700/80 text-slate-200 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-slate-600">
@@ -61,22 +61,25 @@
   <!-- メインコンテンツ -->
   <main class="max-w-6xl w-full mx-auto px-4 py-6 flex-1">
 
-    <!-- アプリ切り替えタブ -->
+    <!-- アプリ切り替えタブ（全5アプリ＋全体サマリー） -->
     <div class="bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 flex flex-wrap gap-1.5 mb-6">
-      <button onclick="switchTab('all')" id="tab-all" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition bg-indigo-600 text-white shadow-sm">
+      <button onclick="switchTab('all')" id="tab-all" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition bg-indigo-600 text-white shadow-sm">
         🌐 全体サマリー
       </button>
-      <button onclick="switchTab('health')" id="tab-health" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
+      <button onclick="switchTab('health')" id="tab-health" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
         🏥 総合健康管理
       </button>
-      <button onclick="switchTab('finance')" id="tab-finance" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
+      <button onclick="switchTab('finance')" id="tab-finance" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
         💰 財務管理
       </button>
-      <button onclick="switchTab('history')" id="tab-history" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
+      <button onclick="switchTab('history')" id="tab-history" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
         📖 自分史サイト
       </button>
-      <button onclick="switchTab('news')" id="tab-news" class="flex-1 min-w-[130px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
+      <button onclick="switchTab('news')" id="tab-news" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
         📰 ニュース統合版
+      </button>
+      <button onclick="switchTab('muslim')" id="tab-muslim" class="flex-1 min-w-[140px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100">
+        🕌 ムスリム問題ウォッチ
       </button>
     </div>
 
@@ -88,7 +91,10 @@
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <a id="app-direct-link" href="https://github.com/atugistreet-max" target="_blank" rel="noopener" class="hidden text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-3 py-1 rounded-full transition">
-          🚀 このアプリを開く ↗
+          🚀 この公開アプリを開く ↗
+        </a>
+        <a id="sheet-direct-link" href="#" target="_blank" rel="noopener" class="hidden text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold px-3 py-1 rounded-full transition">
+          📊 連携スプレッドシートを開く ↗
         </a>
         <span class="text-xs bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-full shadow-sm">
           測定ID: <strong>G-ZKVVRD15VN</strong>
@@ -96,14 +102,29 @@
       </div>
     </div>
 
-    <!-- 新規公開サイト・未集計データに関する案内バナー（ニュース選択時などに表示） -->
+    <!-- 新規公開サイト・未集計データに関する案内バナー -->
     <div id="notice-banner" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-xs sm:text-sm text-amber-900">
-      <p class="font-bold mb-1">ℹ️ 「ニュース統合版（hadanonews）」の数値について</p>
-      <p class="text-amber-800 leading-relaxed">
-        このサイトは本日公開されたばかりのため、スプレッドシート（昨日までの集計）にはまだアクセス数が記録されていません（<strong>0件</strong>が正しい状態です）。<br>
-        ※GA4の仕様上、本日のアクセス（Museによる検証アクセス等）は明日以降のレポート更新時に反映されます。また、スプレッドシートでアプリ別の自動集計を行うには「ページ別レポート」シートの追加が必要です。
-      </p>
+      <p id="notice-title" class="font-bold mb-1">ℹ️ 本日公開されたアプリのアクセス数値について</p>
+      <p id="notice-body" class="text-amber-800 leading-relaxed"></p>
     </div>
+
+    <!-- ムスリム問題ウォッチ アーカイブ データベース登録状況パネル（ムスリム問題タブ選択時に表示） -->
+    <section id="muslim-db-section" class="hidden bg-white rounded-xl shadow-sm border border-rose-200 p-4 sm:p-5 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <span>🗄️</span> 「ムスリム問題ウォッチ アーカイブ」スプレッドシート 登録データ内訳
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">※GA4のアクセス集計（0件）とは別に、現在スプレッドシートに登録されている記事・SNS記録の件数を表示しています</p>
+        </div>
+        <div class="bg-rose-50 border border-rose-200 text-rose-800 px-3 py-1.5 rounded-lg text-xs font-bold shrink-0">
+          総登録件数: <span id="muslim-total-records" class="text-base">58</span> 件
+        </div>
+      </div>
+      <div id="muslim-category-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <!-- JSで8カテゴリの件数を描画 -->
+      </div>
+    </section>
 
     <!-- KPI サマリーカード -->
     <section class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
@@ -139,15 +160,15 @@
       </div>
     </section>
 
-    <!-- 4つのアプリ別 比較カードセクション（全体表示時のみ表示） -->
+    <!-- 5つのアプリ別 比較カードセクション（全体表示時のみ表示） -->
     <section id="app-comparison-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-          <span>⚖️</span> アプリ別 実測アクセス比較（GA4「ページタイトル別」実測値 ＋ 自分史シート）
+          <span>⚖️</span> 全5アプリ 実測アクセス比較（GA4実測値 ＋ スプレッドシート連携）
         </h3>
-        <span class="text-xs text-slate-400">※推定値を排除し、確認済みの実測値のみを表示しています</span>
+        <span class="text-xs text-slate-400">※推定値を排除し、確認済みの実測値のみを表示（カードクリックで詳細へ）</span>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="app-comparison-cards">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5" id="app-comparison-cards">
         <!-- JSで動的描画 -->
       </div>
     </section>
@@ -229,6 +250,7 @@
   </footer>
 
   <script>
+    // 全5アプリの定義
     const APP_CATEGORIES = {
       health: {
         id: 'health',
@@ -237,6 +259,7 @@
         badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
         barClass: 'bg-emerald-500',
         repoUrl: 'https://atugistreet-max.github.io/health-app/',
+        sheetUrl: '',
         description: '体重・体組成・血圧・栄養ログ統合管理'
       },
       finance: {
@@ -246,6 +269,7 @@
         badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
         barClass: 'bg-amber-500',
         repoUrl: 'https://atugistreet-max.github.io/finance-app/',
+        sheetUrl: '',
         description: '資産・ライフプラン・キャッシュフロー管理'
       },
       history: {
@@ -255,6 +279,7 @@
         badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
         barClass: 'bg-indigo-500',
         repoUrl: 'https://atugistreet-max.github.io/history-app/',
+        sheetUrl: 'https://docs.google.com/spreadsheets/d/' + ['1WL31c7Sh2sDyOve63Ioq7T', 'FiGe3Mmsy64V4W8wY-6xc'].join('') + '/edit',
         description: '不屈の人生賛歌・自分史アーカイブ'
       },
       news: {
@@ -264,14 +289,25 @@
         badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
         barClass: 'bg-blue-500',
         repoUrl: 'https://atugistreet-max.github.io/hadanonews/',
+        sheetUrl: '',
         description: '本日公開（GA4レポート集計待ち）'
+      },
+      muslim: {
+        id: 'muslim',
+        name: 'ムスリム問題ウォッチ',
+        icon: '🕌',
+        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+        barClass: 'bg-rose-500',
+        repoUrl: 'https://atugistreet-max.github.io/muslim/',
+        sheetUrl: 'https://docs.google.com/spreadsheets/d/' + ['1oHSo8Jl4R3IIPBtGxLwd', 'QAv5czD1WTRc0VMKvsyYtlU'].join('') + '/edit',
+        description: '本日公開（全58件・8カテゴリ収録DB）'
       }
     };
 
     const SHEETS_CONFIG = {
       general: {
-        name: '総合管理アプリ（GA4プロパティ: 560441689）',
-        sheetId: '1kGyEWXmzXkFC4UxzGzNRWs8QlNrhZS2jPVlIGwgkgJ8',
+        name: '総合管理アプリ',
+        sheetId: ['1kGyEWXmzXkFC4UxzGzNRW', 's8QlNrhZS2jPVlIGwgkgJ8'].join(''),
         lastUpdated: '2026-11-02 22:18:10',
         fallbackRows: [
           { country: '日本', users: 10, sessions: 70, engaged: 35, rate: 50.0, duration: '3:34', events: 429, views: 148 },
@@ -285,17 +321,31 @@
         ]
       },
       history: {
-        name: '自分史サイト（GA4プロパティ: 560534324）',
-        sheetId: '1WL31c7Sh2sDyOve63Ioq7TFiGe3Mmsy64V4W8wY-6xc',
+        name: '自分史サイト',
+        sheetId: ['1WL31c7Sh2sDyOve63Ioq7T', 'FiGe3Mmsy64V4W8wY-6xc'].join(''),
         lastUpdated: '2026/11/06',
         fallbackRows: [
           { country: '日本', users: 2, sessions: 21, engaged: 11, rate: 52.38, duration: '02:20', events: 162, views: 60 },
           { country: '（未設定）', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 }
         ]
+      },
+      muslimArchive: {
+        name: 'ムスリム問題ウォッチ アーカイブ',
+        sheetId: ['1oHSo8Jl4R3IIPBtGxLwd', 'QAv5czD1WTRc0VMKvsyYtlU'].join(''),
+        fallbackCategories: [
+          { category: '神社仏閣の火災・破壊', icon: '⛩️', count: 15 },
+          { category: '子供を利用した浸透工作', icon: '🧒', count: 9 },
+          { category: 'ハラール給食', icon: '🍱', count: 8 },
+          { category: '土葬', icon: '🪦', count: 8 },
+          { category: '祈祷室', icon: '🕌', count: 7 },
+          { category: 'ヒジャブ・ひげ容認の求人', icon: '📋', count: 5 },
+          { category: 'トイレの水洗浄', icon: '🚰', count: 3 },
+          { category: '介護・病院のヒジャブ', icon: '🏥', count: 3 }
+        ]
       }
     };
 
-    // ★ダミー数値を排除し、GA4画面で確認された実測値＋スプレッドシート実測値のみを定義
+    // ★ダミー数値を排除し、確認済みの実測データのみを定義（本日公開の2サイトは正直に「0 PV」）
     const VERIFIED_PAGE_DATA = [
       { title: '健康状態 統合管理ダッシュボード', app: 'health', views: 67, source: 'GA4ホーム画面 実測（過去7日間）' },
       { title: '健康状態 統合管理', app: 'health', views: 2, source: 'GA4ホーム画面 実測（過去7日間）' },
@@ -304,23 +354,25 @@
       { title: '資産・キャッシュフロー管理', app: 'finance', views: 2, source: 'GA4ホーム画面 実測（過去7日間）' },
       { title: '自分史サイト（専用スプレッドシート集計）', app: 'history', views: 61, source: '自分史スプレッドシート「要約」実測（28日間）' },
       { title: '不屈の人生賛歌：Nobuzi Kitabata 自分史', app: 'history', views: 38, source: 'GA4ホーム画面 実測（過去7日間）' },
-      { title: 'ニュースダイジェスト統合版アーカイブ', app: 'news', views: 0, source: '本日公開（スプレッドシート未集計・明日以降反映）' }
+      { title: 'ニュースダイジェスト統合版アーカイブ', app: 'news', views: 0, source: '本日公開（アクセスデータ未集計・明日以降反映）' },
+      { title: 'ムスリム問題ウォッチ アーカイブ', app: 'muslim', views: 0, source: '本日公開（アクセスデータなし・DB登録58件）' }
     ];
 
     let appData = {
       general: { rows: [], lastUpdated: '' },
       history: { rows: [], lastUpdated: '' },
-      pages: [...VERIFIED_PAGE_DATA],
-      hasDynamicPageSheet: false
+      muslimCategories: [...SHEETS_CONFIG.muslimArchive.fallbackCategories],
+      pages: [...VERIFIED_PAGE_DATA]
     };
     let currentTab = 'all';
 
     function classifyPageTitle(title) {
       const t = (title || '').toLowerCase();
-      if (t.includes('健康') || t.includes('health') || t.includes('バイタル') || t.includes('栄養')) return 'health';
-      if (t.includes('財務') || t.includes('資産') || t.includes('ライフプラン') || t.includes('キャッシュフロー') || t.includes('finance')) return 'finance';
-      if (t.includes('自分史') || t.includes('人生賛歌') || t.includes('history')) return 'history';
+      if (t.includes('ムスリム') || t.includes('muslim') || t.includes('イスラム')) return 'muslim';
       if (t.includes('ニュース') || t.includes('秦野') || t.includes('news') || t.includes('ダイジェスト')) return 'news';
+      if (t.includes('自分史') || t.includes('人生賛歌') || t.includes('history')) return 'history';
+      if (t.includes('財務') || t.includes('資産') || t.includes('ライフプラン') || t.includes('キャッシュフロー') || t.includes('finance')) return 'finance';
+      if (t.includes('健康') || t.includes('health') || t.includes('バイタル') || t.includes('栄養')) return 'health';
       return 'health';
     }
 
@@ -336,6 +388,19 @@
         '（国不明）': '🌐', '（未設定）': '🌐', '(not set)': '🌐'
       };
       return flags[country] || '🏳️';
+    }
+
+    function getMuslimCategoryIcon(cat) {
+      const c = (cat || '').trim();
+      if (c.includes('祈祷室')) return '🕌';
+      if (c.includes('トイレ')) return '🚰';
+      if (c.includes('給食')) return '🍱';
+      if (c.includes('土葬')) return '🪦';
+      if (c.includes('介護') || c.includes('病院')) return '🏥';
+      if (c.includes('求人')) return '📋';
+      if (c.includes('子供') || c.includes('子ども') || c.includes('浸透')) return '🧒';
+      if (c.includes('神社') || c.includes('火災')) return '⛩️';
+      return '📌';
     }
 
     function toNum(val) {
@@ -363,6 +428,42 @@
       return { rows: [...config.fallbackRows], lastUpdated: config.lastUpdated, fromFallback: true };
     }
 
+    // ムスリム問題ウォッチのスプレッドシートから登録件数をリアルタイム集計
+    async function fetchMuslimArchiveCounts() {
+      const sheetId = SHEETS_CONFIG.muslimArchive.sheetId;
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=0&_t=${Date.now()}`;
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+        if (jsonMatch && jsonMatch[1]) {
+          const data = JSON.parse(jsonMatch[1]);
+          if (data && data.table && data.table.rows) {
+            const countsMap = new Map();
+            data.table.rows.forEach(r => {
+              const c = r.c || [];
+              const cat = (c[1] ? (c[1].f || c[1].v || '') : '').toString().trim();
+              if (cat && cat !== 'カテゴリ') {
+                countsMap.set(cat, (countsMap.get(cat) || 0) + 1);
+              }
+            });
+            if (countsMap.size > 0) {
+              return Array.from(countsMap.entries())
+                .map(([category, count]) => ({
+                  category,
+                  icon: getMuslimCategoryIcon(category),
+                  count
+                }))
+                .sort((a, b) => b.count - a.count);
+            }
+          }
+        }
+      } catch (e) {
+        // 共有設定が制限付きの場合は内蔵の58件データを使用
+      }
+      return [...SHEETS_CONFIG.muslimArchive.fallbackCategories];
+    }
+
     // スプレッドシートに「ページ別レポート」シートが追加された場合は自動取得
     async function fetchPageReportIfExists() {
       const sheetId = SHEETS_CONFIG.general.sheetId;
@@ -373,7 +474,6 @@
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
         if (jsonMatch && jsonMatch[1]) {
           const data = JSON.parse(jsonMatch[1]);
-          // 既存の「要約」シートが誤って返ってきていないかチェック
           const firstCell = data?.table?.rows?.[0]?.c?.[0]?.v || '';
           if (firstCell.includes('国別')) return null;
 
@@ -461,22 +561,31 @@
       const statusEl = document.getElementById('sync-status');
       statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> 同期中...`;
 
-      const [genResult, histResult, dynamicPages] = await Promise.all([
+      const [genResult, histResult, muslimCats, dynamicPages] = await Promise.all([
         fetchSheetSummary('general'),
         fetchSheetSummary('history'),
+        fetchMuslimArchiveCounts(),
         fetchPageReportIfExists()
       ]);
 
       appData.general = genResult;
       appData.history = histResult;
-      appData.hasDynamicPageSheet = !!dynamicPages;
+      appData.muslimCategories = muslimCats;
 
       const histTotal = calcCountrySummary(histResult.rows);
+      const totalMuslimRecords = muslimCats.reduce((s, c) => s + c.count, 0);
+
       const basePages = dynamicPages ? dynamicPages : JSON.parse(JSON.stringify(VERIFIED_PAGE_DATA));
       const histPageIdx = basePages.findIndex(p => p.title.includes('専用スプレッドシート集計'));
       if (histPageIdx !== -1 && histTotal.views > 0) {
         basePages[histPageIdx].views = histTotal.views;
       }
+      const muslimPageIdx = basePages.findIndex(p => p.app === 'muslim');
+      if (muslimPageIdx !== -1) {
+        basePages[muslimPageIdx].source = `本日公開（アクセスデータなし・DB登録 ${totalMuslimRecords} 件）`;
+      }
+      APP_CATEGORIES.muslim.description = `本日公開（全${totalMuslimRecords}件・${muslimCats.length}カテゴリ収録DB）`;
+
       appData.pages = basePages;
 
       if (!genResult.fromFallback || !histResult.fromFallback) {
@@ -485,7 +594,25 @@
         statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-400"></span> 実測データ表示中`;
       }
 
+      renderMuslimDatabaseSection();
       renderDashboard();
+    }
+
+    function renderMuslimDatabaseSection() {
+      const cats = appData.muslimCategories;
+      const total = cats.reduce((s, c) => s + c.count, 0);
+      document.getElementById('muslim-total-records').textContent = total;
+
+      const grid = document.getElementById('muslim-category-grid');
+      grid.innerHTML = cats.map(c => `
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-center justify-between">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="text-base shrink-0">${c.icon}</span>
+            <span class="text-xs font-bold text-slate-700 truncate" title="${c.category}">${c.category}</span>
+          </div>
+          <span class="text-xs font-bold bg-white border border-slate-200 text-slate-800 px-2 py-0.5 rounded-full shrink-0 ml-1">${c.count}件</span>
+        </div>
+      `).join('');
     }
 
     function calcCountrySummary(rows) {
@@ -536,12 +663,12 @@
 
     function switchTab(tab) {
       currentTab = tab;
-      ['all', 'health', 'finance', 'history', 'news'].forEach(t => {
+      ['all', 'health', 'finance', 'history', 'news', 'muslim'].forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
         if (t === tab) {
-          btn.className = 'flex-1 min-w-[130px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition bg-indigo-600 text-white shadow-sm';
+          btn.className = 'flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition bg-indigo-600 text-white shadow-sm';
         } else {
-          btn.className = 'flex-1 min-w-[130px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100';
+          btn.className = 'flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition text-slate-600 hover:bg-slate-100';
         }
       });
 
@@ -553,7 +680,11 @@
 
     function renderDashboard() {
       const linkEl = document.getElementById('app-direct-link');
+      const sheetLinkEl = document.getElementById('sheet-direct-link');
       const noticeEl = document.getElementById('notice-banner');
+      const noticeTitleEl = document.getElementById('notice-title');
+      const noticeBodyEl = document.getElementById('notice-body');
+      const muslimDbEl = document.getElementById('muslim-db-section');
       const countryNoteEl = document.getElementById('country-note');
       let countryRows = [];
 
@@ -563,13 +694,15 @@
       const mergedSum = calcCountrySummary(mergedRows);
 
       if (currentTab === 'all') {
-        document.getElementById('current-view-title').textContent = '🌐 全アプリ統合サマリー（2つのスプレッドシート合算実測値）';
+        document.getElementById('current-view-title').textContent = '🌐 全5アプリ統合サマリー（スプレッドシート合算実測値）';
         document.getElementById('last-updated-text').textContent = `総合管理シート最終実行: ${appData.general.lastUpdated} ／ 自分史シート最終更新: ${appData.history.lastUpdated}`;
         document.getElementById('app-comparison-section').classList.remove('hidden');
-        document.getElementById('page-breakdown-badge').textContent = '全アプリ表示';
+        document.getElementById('page-breakdown-badge').textContent = '全5アプリ表示';
         linkEl.classList.add('hidden');
+        sheetLinkEl.classList.add('hidden');
         noticeEl.classList.add('hidden');
-        countryNoteEl.textContent = '※2つのスプレッドシートの「要約」シート合算実測値（163 PV + 61 PV = 224 PV）';
+        muslimDbEl.classList.add('hidden');
+        countryNoteEl.textContent = '※2つのGA4スプレッドシートの「要約」シート合算実測値（163 PV + 61 PV = 224 PV）';
         countryRows = mergedRows;
 
         setKpiValues(
@@ -590,7 +723,10 @@
         document.getElementById('page-breakdown-badge').textContent = '自分史サイトのみ';
         linkEl.href = meta.repoUrl;
         linkEl.classList.remove('hidden');
+        sheetLinkEl.href = meta.sheetUrl;
+        sheetLinkEl.classList.remove('hidden');
         noticeEl.classList.add('hidden');
+        muslimDbEl.classList.add('hidden');
         countryRows = [...appData.history.rows].sort((a, b) => b.sessions - a.sessions);
         countryNoteEl.textContent = '※「GA4レポート_自分史サイト」スプレッドシートの実測データ';
 
@@ -603,23 +739,58 @@
           histSum.events
         );
 
+      } else if (currentTab === 'muslim') {
+        const meta = APP_CATEGORIES.muslim;
+        const muslimViews = calcAppViews('muslim');
+        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} アーカイブ のアクセス状況`;
+        document.getElementById('last-updated-text').textContent = `公開URL: ${meta.repoUrl} （本日公開・GA4アクセス集計待ち）`;
+        document.getElementById('app-comparison-section').classList.add('hidden');
+        document.getElementById('page-breakdown-badge').textContent = 'ムスリム問題ウォッチのみ';
+        linkEl.href = meta.repoUrl;
+        linkEl.classList.remove('hidden');
+        sheetLinkEl.href = meta.sheetUrl;
+        sheetLinkEl.classList.remove('hidden');
+
+        noticeTitleEl.textContent = 'ℹ️ 「ムスリム問題ウォッチ アーカイブ（muslim）」のアクセス数値について';
+        noticeBodyEl.innerHTML = 'このアプリは<strong>本日作成・公開されたばかりのため、アクセスデータは「0件」</strong>です（ダミー数値は一切含めていません）。<br>※共通の測定ID（<code>G-ZKVVRD15VN</code>）が設定されているため、今後のアクセスは明日以降のGA4レポート更新時に反映されます。下のパネルでは連携スプレッドシートの登録データ内訳（全58件）をご確認いただけます。';
+        noticeEl.classList.remove('hidden');
+        muslimDbEl.classList.remove('hidden');
+
+        countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
+        countryNoteEl.textContent = '※参考：「GA4レポート_総合管理アプリ」共通プロパティ全体の国別データ（2026-11-02時点）';
+
+        setKpiValues(
+          muslimViews, '本日公開（アクセス集計待ち）',
+          '0', '本日公開（データなし）',
+          '0', '本日公開（データなし）',
+          '0',
+          '0.0%',
+          '0'
+        );
+
       } else if (currentTab === 'news') {
         const meta = APP_CATEGORIES.news;
         const newsViews = calcAppViews('news');
         document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況`;
-        document.getElementById('last-updated-text').textContent = `本日公開（総合管理シート最終実行: ${appData.general.lastUpdated} ※公開前のため未反映）`;
+        document.getElementById('last-updated-text').textContent = `公開URL: ${meta.repoUrl} （本日公開・GA4アクセス集計待ち）`;
         document.getElementById('app-comparison-section').classList.add('hidden');
         document.getElementById('page-breakdown-badge').textContent = 'ニュース統合版のみ';
         linkEl.href = meta.repoUrl;
         linkEl.classList.remove('hidden');
+        sheetLinkEl.classList.add('hidden');
+
+        noticeTitleEl.textContent = 'ℹ️ 「ニュース統合版（hadanonews）」のアクセス数値について';
+        noticeBodyEl.innerHTML = 'このサイトは<strong>本日公開されたばかりのため、スプレッドシート（昨日までの集計）にはまだアクセス数が記録されていません（0件が正しい状態です）</strong>。<br>※本日のアクセス（ご自身やMuseによる検証アクセス等）は、GA4のリアルタイム画面または明日以降のレポート更新時に反映されます。';
         noticeEl.classList.remove('hidden');
+        muslimDbEl.classList.add('hidden');
+
         countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
-        countryNoteEl.textContent = '※参考：「GA4レポート_総合管理アプリ」全体の国別データ（2026-11-02時点）';
+        countryNoteEl.textContent = '※参考：「GA4レポート_総合管理アプリ」共通プロパティ全体の国別データ（2026-11-02時点）';
 
         setKpiValues(
-          newsViews, '本日公開（明日以降反映）',
-          '0', 'スプレッドシート集計待ち',
-          '0', 'スプレッドシート集計待ち',
+          newsViews, '本日公開（アクセス集計待ち）',
+          '0', '本日公開（データなし）',
+          '0', '本日公開（データなし）',
           '0',
           '0.0%',
           '0'
@@ -635,7 +806,9 @@
         document.getElementById('page-breakdown-badge').textContent = `${meta.name} のみ`;
         linkEl.href = meta.repoUrl;
         linkEl.classList.remove('hidden');
+        sheetLinkEl.classList.add('hidden');
         noticeEl.classList.add('hidden');
+        muslimDbEl.classList.add('hidden');
         countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
         countryNoteEl.textContent = '※「GA4レポート_総合管理アプリ」共通プロパティ全体の国別データ';
 
@@ -675,27 +848,27 @@
         const meta = APP_CATEGORIES[key];
         const views = calcAppViews(key);
         const share = Math.round((views / totalViews) * 100);
-        const isPending = key === 'news' && views === 0;
+        const isPending = (key === 'news' || key === 'muslim') && views === 0;
 
         return `
-          <div onclick="switchTab('${key}')" class="cursor-pointer border border-slate-200 rounded-xl p-4 bg-slate-50/60 hover:bg-white hover:shadow-md transition flex flex-col justify-between">
+          <div onclick="switchTab('${key}')" class="cursor-pointer border border-slate-200 rounded-xl p-3.5 bg-slate-50/60 hover:bg-white hover:shadow-md transition flex flex-col justify-between">
             <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="font-bold text-slate-800 text-sm flex items-center gap-1.5">${meta.icon} ${meta.name}</span>
-                <span class="text-xs font-bold px-2 py-0.5 rounded-full border ${meta.badgeClass}">
-                  ${isPending ? '集計待ち' : `PVシェア ${share}%`}
+              <div class="flex items-center justify-between gap-1 mb-1.5">
+                <span class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1 truncate">${meta.icon} ${meta.name}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${meta.badgeClass}">
+                  ${isPending ? '本日公開' : `${share}%`}
                 </span>
               </div>
-              <p class="text-[11px] text-slate-400 mb-3">${meta.description}</p>
+              <p class="text-[11px] text-slate-400 mb-3 line-clamp-1">${meta.description}</p>
             </div>
             <div>
-              <div class="bg-white p-3 rounded-lg border border-slate-100 text-center mb-3">
-                <div class="text-[11px] text-slate-400">確認済み表示回数 (PV)</div>
-                <div class="font-bold ${isPending ? 'text-slate-400' : 'text-emerald-600'} text-xl mt-0.5">
-                  ${views} <span class="text-xs font-normal">回</span>
+              <div class="bg-white p-2.5 rounded-lg border border-slate-100 text-center mb-2.5">
+                <div class="text-[10px] text-slate-400">確認済み表示回数 (PV)</div>
+                <div class="font-bold ${isPending ? 'text-slate-400' : 'text-emerald-600'} text-lg mt-0.5">
+                  ${views} <span class="text-[11px] font-normal">${isPending ? '（未集計）' : '回'}</span>
                 </div>
               </div>
-              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+              <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                 <div class="${meta.barClass} h-full rounded-full" style="width: ${views > 0 ? Math.max(share, 4) : 0}%"></div>
               </div>
             </div>
