@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マイアプリ アクセス解析ダッシュボード</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZKVVRD15VN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    const GA_MEASUREMENT_ID = 'G-ZKVVRD15VN';
+    gtag('config', GA_MEASUREMENT_ID, {
+      'app_name': 'アクセス解析ダッシュボード'
+    });
+  </script>
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background-color: #f1f5f9;
+    }
+    .kpi-card {
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+  <!-- ヘッダー -->
+  <header class="bg-gradient-to-r from-indigo-900 via-slate-900 to-slate-800 text-white shadow-md sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
+          <span>📊</span> マイアプリ アクセス解析ダッシュボード
+        </h1>
+        <p class="text-xs sm:text-sm text-indigo-200 mt-0.5">GA4 スプレッドシート連携・直近28日間のアクセス状況</p>
+      </div>
+      <div class="flex items-center gap-2 self-end sm:self-auto">
+        <span id="sync-status" class="text-xs bg-slate-700/80 text-slate-200 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-slate-600">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          データ読込中...
+        </span>
+        <button onclick="loadAllData()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1">
+          🔄 最新データ取得
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="max-w-6xl w-full mx-auto px-4 py-6 flex-1">
+
+    <!-- アプリ切り替えタブ -->
+    <div class="bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 flex flex-wrap gap-1 mb-6">
+      <button onclick="switchTab('all')" id="tab-all" class="flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-bold transition bg-indigo-600 text-white shadow-sm">
+        🌐 全アプリ統合（合算）
+      </button>
+      <button onclick="switchTab('general')" id="tab-general" class="flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-bold transition text-slate-600 hover:bg-slate-100">
+        📱 総合管理アプリ
+      </button>
+      <button onclick="switchTab('history')" id="tab-history" class="flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-bold transition text-slate-600 hover:bg-slate-100">
+        📖 自分史サイト
+      </button>
+    </div>
+
+    <!-- 対象情報バー -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 px-1">
+      <div>
+        <h2 id="current-view-title" class="text-lg font-bold text-slate-800">全アプリ統合（直近28日間）</h2>
+        <p id="last-updated-text" class="text-xs text-slate-500">最終更新: 確認中...</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-full shadow-sm">
+          測定ID: <strong>G-ZKVVRD15VN</strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI サマリーカード -->
+    <section class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
+        <p class="text-xs font-bold text-slate-400 mb-1">👥 ユーザー数</p>
+        <p id="kpi-users" class="text-2xl sm:text-3xl font-bold text-slate-800">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">訪れた人の数</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
+        <p class="text-xs font-bold text-slate-400 mb-1">🚪 セッション数</p>
+        <p id="kpi-sessions" class="text-2xl sm:text-3xl font-bold text-indigo-600">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">訪問された回数</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
+        <p class="text-xs font-bold text-slate-400 mb-1">📄 表示回数 (PV)</p>
+        <p id="kpi-views" class="text-2xl sm:text-3xl font-bold text-emerald-600">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">ページが見られた数</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
+        <p class="text-xs font-bold text-slate-400 mb-1">🔥 エンゲージ数</p>
+        <p id="kpi-engaged" class="text-2xl sm:text-3xl font-bold text-amber-600">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">じっくり見られた訪問</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
+        <p class="text-xs font-bold text-slate-400 mb-1">📈 エンゲージ率</p>
+        <p id="kpi-rate" class="text-2xl sm:text-3xl font-bold text-blue-600">0%</p>
+        <p class="text-[11px] text-slate-400 mt-1">直帰しなかった割合</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
+        <p class="text-xs font-bold text-slate-400 mb-1">⚡ イベント発生数</p>
+        <p id="kpi-events" class="text-2xl sm:text-3xl font-bold text-purple-600">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">クリックや操作の総数</p>
+      </div>
+    </section>
+
+    <!-- アプリ別比較セクション（統合表示時のみ表示） -->
+    <section id="app-comparison-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-6">
+      <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-1.5">
+        <span>⚖️</span> アプリ別 アクセス比較（直近28日間）
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="app-comparison-cards">
+        <!-- JSで動的描画 -->
+      </div>
+    </section>
+
+    <!-- 国・地域別ランキング＆詳細テーブル -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- 左側：国別セッション割合グラフ -->
+      <section class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5">
+        <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-1.5">
+          <span>🌍</span> 国・地域別 アクセス割合（セッション基準）
+        </h3>
+        <div id="country-bars" class="space-y-3.5">
+          <!-- JSで動的描画 -->
+        </div>
+      </section>
+
+      <!-- 右側：国別詳細データ一覧表 -->
+      <section class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+            <span>📋</span> 国・地域別 詳細データ表
+          </h3>
+          <span class="text-xs text-slate-400">セッション数の多い順</span>
+        </div>
+        <div class="overflow-x-auto flex-1">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs">
+                <th class="py-3 px-4">国・地域</th>
+                <th class="py-3 px-3 text-right">ユーザー</th>
+                <th class="py-3 px-3 text-right">セッション</th>
+                <th class="py-3 px-3 text-right">表示回数</th>
+                <th class="py-3 px-3 text-right">エンゲージ率</th>
+                <th class="py-3 px-3 text-right">平均時間</th>
+                <th class="py-3 px-4 text-right">イベント数</th>
+              </tr>
+            </thead>
+            <tbody id="country-table-body" class="divide-y divide-slate-100">
+              <!-- JSで動的描画 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 mt-12 py-4 text-center text-xs text-slate-400">
+    マイアプリ アクセス解析ダッシュボード | Google Analytics 4 連携
+  </footer>
+
+  <script>
+    // スプレッドシート定義
+    const SHEETS_CONFIG = {
+      general: {
+        name: '総合管理アプリ',
+        url: 'https://docs.google.com/spreadsheets/d/1kGyEWXmzXkFC4UxzGzNRWs8QlNrhZS2jPVlIGwgkgJ8/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent('要約'),
+        lastUpdated: '2026-11-02 22:18:10',
+        fallbackRows: [
+          { country: '日本', users: 10, sessions: 70, engaged: 35, rate: 50.0, duration: '3:34', events: 429, views: 148 },
+          { country: 'アメリカ', users: 9, sessions: 9, engaged: 2, rate: 22.2, duration: '0:04', events: 38, views: 9 },
+          { country: '（国不明）', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 4, views: 1 },
+          { country: 'ドイツ', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 3, views: 1 },
+          { country: 'イラン', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 4, views: 1 },
+          { country: 'オランダ', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 3, views: 1 },
+          { country: 'セーシェル', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 3, views: 1 },
+          { country: 'イギリス', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 4, views: 1 }
+        ]
+      },
+      history: {
+        name: '自分史サイト',
+        url: 'https://docs.google.com/spreadsheets/d/1WL31c7Sh2sDyOve63Ioq7TFiGe3Mmsy64V4W8wY-6xc/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent('要約'),
+        lastUpdated: '2026/11/06',
+        fallbackRows: [
+          { country: '日本', users: 2, sessions: 21, engaged: 11, rate: 52.38, duration: '02:20', events: 162, views: 60 },
+          { country: '（未設定）', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 }
+        ]
+      }
+    };
+
+    let appData = {
+      general: { rows: [], lastUpdated: '' },
+      history: { rows: [], lastUpdated: '' }
+    };
+    let currentTab = 'all';
+
+    // 国旗アイコン補助
+    function getCountryFlag(country) {
+      const flags = {
+        '日本': '🇯🇵',
+        'アメリカ': '🇺🇸',
+        'ドイツ': '🇩🇪',
+        'イギリス': '🇬🇧',
+        'オランダ': '🇳🇱',
+        'イラン': '🇮🇷',
+        'セーシェル': '🇸🇨',
+        '（国不明）': '🌐',
+        '（未設定）': '🌐'
+      };
+      return flags[country] || '🏳️';
+    }
+
+    // 数値パース補助
+    function toNum(val) {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      const cleaned = val.toString().replace(/[%,,]/g, '').trim();
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+
+    // スプレッドシートのJSONP取得（複数シート対応のためfetch/script併用）
+    async function fetchSheetGviz(key) {
+      const config = SHEETS_CONFIG[key];
+      try {
+        const res = await fetch(config.url + '&_t=' + Date.now());
+        const text = await res.text();
+        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+        if (jsonMatch && jsonMatch[1]) {
+          const data = JSON.parse(jsonMatch[1]);
+          return parseGvizTable(data, config);
+        }
+      } catch (e) {
+        console.warn(`Direct fetch fallback for ${key}:`, e);
+      }
+      return {
+        rows: [...config.fallbackRows],
+        lastUpdated: config.lastUpdated,
+        fromFallback: true
+      };
+    }
+
+    function parseGvizTable(data, config) {
+      let lastUpdated = config.lastUpdated;
+      const parsedRows = [];
+
+      if (data && data.table && data.table.rows) {
+        data.table.rows.forEach(r => {
+          const c = r.c || [];
+          const getVal = (idx) => (c[idx] ? (c[idx].f || c[idx].v || '') : '').toString().trim();
+
+          const col0 = getVal(0);
+          const col1 = getVal(1);
+
+          if (col0 === '最終更新' && col1) {
+            lastUpdated = col1;
+            return;
+          }
+
+          // ヘッダー行・合計行・注釈行を除外
+          if (
+            !col0 ||
+            col0 === '国' ||
+            col0 === '合計' ||
+            col0.includes('GA4要約') ||
+            col0.startsWith('※')
+          ) {
+            return;
+          }
+
+          const users = toNum(getVal(1));
+          const sessions = toNum(getVal(2));
+          if (users === 0 && sessions === 0) return;
+
+          let rawRate = getVal(4);
+          let rateNum = toNum(rawRate);
+          // 小数表記(0.5など)の場合は%に変換
+          if (rateNum > 0 && rateNum <= 1 && !rawRate.includes('%')) {
+            rateNum = +(rateNum * 100).toFixed(1);
+          }
+
+          parsedRows.push({
+            country: col0,
+            users: users,
+            sessions: sessions,
+            engaged: toNum(getVal(3)),
+            rate: rateNum,
+            duration: getVal(5) || '0:00',
+            events: toNum(getVal(6)),
+            views: toNum(getVal(7))
+          });
+        });
+      }
+
+      if (parsedRows.length > 0) {
+        return { rows: parsedRows, lastUpdated, fromFallback: false };
+      }
+      return { rows: [...config.fallbackRows], lastUpdated: config.lastUpdated, fromFallback: true };
+    }
+
+    async function loadAllData() {
+      const statusEl = document.getElementById('sync-status');
+      statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> 同期中...`;
+
+      const [genResult, histResult] = await Promise.all([
+        fetchSheetGviz('general'),
+        fetchSheetGviz('history')
+      ]);
+
+      appData.general = genResult;
+      appData.history = histResult;
+
+      if (!genResult.fromFallback || !histResult.fromFallback) {
+        statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> スプレッドシート同期済`;
+      } else {
+        statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-400"></span> 最新キャッシュ表示中`;
+      }
+
+      renderDashboard();
+    }
+
+    function calcSummary(rows) {
+      const totals = rows.reduce((acc, r) => {
+        acc.users += r.users;
+        acc.sessions += r.sessions;
+        acc.engaged += r.engaged;
+        acc.events += r.events;
+        acc.views += r.views;
+        return acc;
+      }, { users: 0, sessions: 0, engaged: 0, events: 0, views: 0 });
+
+      totals.rate = totals.sessions > 0 ? ((totals.engaged / totals.sessions) * 100).toFixed(1) : '0.0';
+      return totals;
+    }
+
+    function getMergedRows() {
+      const map = new Map();
+      const normalizeCountry = (name) => (name === '（未設定）' ? '（国不明）' : name);
+
+      [...appData.general.rows, ...appData.history.rows].forEach(r => {
+        const key = normalizeCountry(r.country);
+        if (!map.has(key)) {
+          map.set(key, {
+            country: key,
+            users: 0,
+            sessions: 0,
+            engaged: 0,
+            rate: 0,
+            duration: '-',
+            events: 0,
+            views: 0
+          });
+        }
+        const item = map.get(key);
+        item.users += r.users;
+        item.sessions += r.sessions;
+        item.engaged += r.engaged;
+        item.events += r.events;
+        item.views += r.views;
+        item.rate = item.sessions > 0 ? +((item.engaged / item.sessions) * 100).toFixed(1) : 0;
+        if (r.duration && r.duration !== '0:00' && r.duration !== '00:00') {
+          item.duration = r.duration;
+        } else if (item.duration === '-') {
+          item.duration = '0:00';
+        }
+      });
+
+      return Array.from(map.values()).sort((a, b) => b.sessions - a.sessions);
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      ['all', 'general', 'history'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.className = 'flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-bold transition bg-indigo-600 text-white shadow-sm';
+        } else {
+          btn.className = 'flex-1 min-w-[140px] py-2.5 px-4 rounded-lg text-sm font-bold transition text-slate-600 hover:bg-slate-100';
+        }
+      });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'switch_dashboard_tab', { tab_name: tab });
+      }
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      let targetRows = [];
+      let titleText = '';
+      let updatedText = '';
+
+      if (currentTab === 'all') {
+        targetRows = getMergedRows();
+        titleText = '🌐 全アプリ統合アクセス状況（直近28日間）';
+        updatedText = `総合管理アプリ更新: ${appData.general.lastUpdated} ／ 自分史サイト更新: ${appData.history.lastUpdated}`;
+        document.getElementById('app-comparison-section').classList.remove('hidden');
+        renderComparisonCards();
+      } else if (currentTab === 'general') {
+        targetRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
+        titleText = '📱 総合管理アプリ アクセス状況（直近28日間）';
+        updatedText = `最終更新: ${appData.general.lastUpdated}`;
+        document.getElementById('app-comparison-section').classList.add('hidden');
+      } else {
+        targetRows = [...appData.history.rows].sort((a, b) => b.sessions - a.sessions);
+        titleText = '📖 自分史サイト アクセス状況（直近28日間）';
+        updatedText = `最終更新: ${appData.history.lastUpdated}`;
+        document.getElementById('app-comparison-section').classList.add('hidden');
+      }
+
+      document.getElementById('current-view-title').textContent = titleText;
+      document.getElementById('last-updated-text').textContent = updatedText;
+
+      const summary = calcSummary(targetRows);
+      document.getElementById('kpi-users').textContent = summary.users.toLocaleString();
+      document.getElementById('kpi-sessions').textContent = summary.sessions.toLocaleString();
+      document.getElementById('kpi-views').textContent = summary.views.toLocaleString();
+      document.getElementById('kpi-engaged').textContent = summary.engaged.toLocaleString();
+      document.getElementById('kpi-rate').textContent = `${summary.rate}%`;
+      document.getElementById('kpi-events').textContent = summary.events.toLocaleString();
+
+      renderCountryBars(targetRows, summary.sessions);
+      renderCountryTable(targetRows);
+    }
+
+    function renderComparisonCards() {
+      const genSum = calcSummary(appData.general.rows);
+      const histSum = calcSummary(appData.history.rows);
+      const totalSessions = genSum.sessions + histSum.sessions || 1;
+
+      const genShare = Math.round((genSum.sessions / totalSessions) * 100);
+      const histShare = Math.round((histSum.sessions / totalSessions) * 100);
+
+      const container = document.getElementById('app-comparison-cards');
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/60 hover:bg-slate-50 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-800 flex items-center gap-1.5">📱 総合管理アプリ</span>
+            <span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">シェア ${genShare}%</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2 text-center my-3">
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">ユーザー</div>
+              <div class="font-bold text-slate-800 text-base">${genSum.users}</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">セッション</div>
+              <div class="font-bold text-indigo-600 text-base">${genSum.sessions}</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">表示回数</div>
+              <div class="font-bold text-emerald-600 text-base">${genSum.views}</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">エンゲージ率</div>
+              <div class="font-bold text-blue-600 text-base">${genSum.rate}%</div>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div class="bg-indigo-600 h-full rounded-full" style="width: ${genShare}%"></div>
+          </div>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/60 hover:bg-slate-50 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-800 flex items-center gap-1.5">📖 自分史サイト</span>
+            <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full">シェア ${histShare}%</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2 text-center my-3">
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">ユーザー</div>
+              <div class="font-bold text-slate-800 text-base">${histSum.users}</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">セッション</div>
+              <div class="font-bold text-indigo-600 text-base">${histSum.sessions}</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">表示回数</div>
+              <div class="font-bold text-emerald-600 text-base">${histSum.views}</div>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-100">
+              <div class="text-[11px] text-slate-400">エンゲージ率</div>
+              <div class="font-bold text-blue-600 text-base">${histSum.rate}%</div>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div class="bg-emerald-500 h-full rounded-full" style="width: ${histShare}%"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCountryBars(rows, totalSessions) {
+      const container = document.getElementById('country-bars');
+      container.innerHTML = '';
+
+      rows.forEach(r => {
+        const pct = totalSessions > 0 ? ((r.sessions / totalSessions) * 100).toFixed(1) : 0;
+        const flag = getCountryFlag(r.country);
+
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div class="flex justify-between text-xs mb-1">
+            <span class="font-bold text-slate-700">${flag} ${r.country}</span>
+            <span class="text-slate-500"><strong class="text-slate-800">${r.sessions}</strong> セッション (${pct}%)</span>
+          </div>
+          <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+            <div class="bg-indigo-500 h-full rounded-full transition-all duration-500" style="width: ${Math.max(pct, 2)}%"></div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderCountryTable(rows) {
+      const tbody = document.getElementById('country-table-body');
+      tbody.innerHTML = '';
+
+      rows.forEach(r => {
+        const flag = getCountryFlag(r.country);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${flag} ${r.country}</td>
+          <td class="py-3 px-3 text-right font-medium text-slate-700">${r.users}</td>
+          <td class="py-3 px-3 text-right font-bold text-indigo-600">${r.sessions}</td>
+          <td class="py-3 px-3 text-right font-medium text-emerald-600">${r.views}</td>
+          <td class="py-3 px-3 text-right">
+            <span class="text-xs px-2 py-0.5 rounded-full font-bold ${r.rate >= 40 ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}">
+              ${r.rate}%
+            </span>
+          </td>
+          <td class="py-3 px-3 text-right text-slate-600 font-mono text-xs">${r.duration}</td>
+          <td class="py-3 px-4 text-right text-slate-600">${r.events}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 初回データ読込
+    loadAllData();
+  </script>
+</body>
+</html>
