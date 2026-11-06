@@ -44,7 +44,7 @@
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
           <span>📊</span> マイアプリ アクセス解析ダッシュボード
         </h1>
-        <p class="text-xs sm:text-sm text-indigo-200 mt-0.5">総合健康管理・財務管理・自分史サイト・ニュースのアプリ別分析</p>
+        <p class="text-xs sm:text-sm text-indigo-200 mt-0.5">スプレッドシート＆GA4実測データに基づく正確なアクセス分析</p>
       </div>
       <div class="flex items-center gap-2 self-end sm:self-auto">
         <span id="sync-status" class="text-xs bg-slate-700/80 text-slate-200 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-slate-600">
@@ -96,22 +96,31 @@
       </div>
     </div>
 
+    <!-- 新規公開サイト・未集計データに関する案内バナー（ニュース選択時などに表示） -->
+    <div id="notice-banner" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-xs sm:text-sm text-amber-900">
+      <p class="font-bold mb-1">ℹ️ 「ニュース統合版（hadanonews）」の数値について</p>
+      <p class="text-amber-800 leading-relaxed">
+        このサイトは本日公開されたばかりのため、スプレッドシート（昨日までの集計）にはまだアクセス数が記録されていません（<strong>0件</strong>が正しい状態です）。<br>
+        ※GA4の仕様上、本日のアクセス（Museによる検証アクセス等）は明日以降のレポート更新時に反映されます。また、スプレッドシートでアプリ別の自動集計を行うには「ページ別レポート」シートの追加が必要です。
+      </p>
+    </div>
+
     <!-- KPI サマリーカード -->
     <section class="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
       <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
         <p class="text-xs font-bold text-slate-400 mb-1">📄 表示回数 (PV)</p>
         <p id="kpi-views" class="text-2xl sm:text-3xl font-bold text-emerald-600">0</p>
-        <p class="text-[11px] text-slate-400 mt-1">ページが見られた数</p>
+        <p id="kpi-views-sub" class="text-[11px] text-slate-400 mt-1">ページが見られた数</p>
       </div>
       <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
         <p class="text-xs font-bold text-slate-400 mb-1">👥 ユーザー数</p>
         <p id="kpi-users" class="text-2xl sm:text-3xl font-bold text-slate-800">0</p>
-        <p class="text-[11px] text-slate-400 mt-1">訪れた人の数</p>
+        <p id="kpi-users-sub" class="text-[11px] text-slate-400 mt-1">訪れた人の数</p>
       </div>
       <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
         <p class="text-xs font-bold text-slate-400 mb-1">🚪 セッション数</p>
         <p id="kpi-sessions" class="text-2xl sm:text-3xl font-bold text-indigo-600">0</p>
-        <p class="text-[11px] text-slate-400 mt-1">訪問された回数</p>
+        <p id="kpi-sessions-sub" class="text-[11px] text-slate-400 mt-1">訪問された回数</p>
       </div>
       <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 kpi-card">
         <p class="text-xs font-bold text-slate-400 mb-1">🔥 エンゲージ数</p>
@@ -134,20 +143,20 @@
     <section id="app-comparison-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-          <span>⚖️</span> アプリ別 アクセス比較（総合健康管理 ／ 財務管理 ／ 自分史サイト ／ ニュース）
+          <span>⚖️</span> アプリ別 実測アクセス比較（GA4「ページタイトル別」実測値 ＋ 自分史シート）
         </h3>
-        <span class="text-xs text-slate-400">カードをクリックすると各アプリの詳細に切り替わります</span>
+        <span class="text-xs text-slate-400">※推定値を排除し、確認済みの実測値のみを表示しています</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="app-comparison-cards">
         <!-- JSで動的描画 -->
       </div>
     </section>
 
-    <!-- ページタイトル別の内訳（個別アプリ選択時＆全体表示） -->
+    <!-- ページタイトル別の内訳 -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-6">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
         <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-          <span>📑</span> ページタイトル別 アクセス内訳（GA4「ページタイトルとスクリーンクラス」連動）
+          <span>📑</span> ページタイトル別 アクセス内訳（実測データのみ）
         </h3>
         <span id="page-breakdown-badge" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-medium">全ページ</span>
       </div>
@@ -157,9 +166,9 @@
             <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs">
               <th class="py-2.5 px-4">アプリ分類</th>
               <th class="py-2.5 px-4">ページタイトル（画面名）</th>
+              <th class="py-2.5 px-4">データの出典・状態</th>
               <th class="py-2.5 px-3 text-right">表示回数 (PV)</th>
-              <th class="py-2.5 px-3 text-right">アクティブユーザー</th>
-              <th class="py-2.5 px-4 w-48">表示シェア</th>
+              <th class="py-2.5 px-4 w-44">表示シェア</th>
             </tr>
           </thead>
           <tbody id="page-table-body" class="divide-y divide-slate-100">
@@ -175,7 +184,7 @@
       <!-- 左側：国別セッション割合グラフ -->
       <section class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5">
         <h3 class="text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-          <span>🌍</span> 国・地域別 アクセス割合
+          <span>🌍</span> 国・地域別 アクセス割合（スプレッドシート実測）
         </h3>
         <p id="country-note" class="text-[11px] text-slate-400 mb-4">※スプレッドシート「要約」シートの国別データ</p>
         <div id="country-bars" class="space-y-3.5">
@@ -187,7 +196,7 @@
       <section class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
           <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-            <span>📋</span> 国・地域別 詳細データ表
+            <span>📋</span> 国・地域別 詳細データ表（スプレッドシート直結）
           </h3>
           <span class="text-xs text-slate-400">セッション数の多い順</span>
         </div>
@@ -216,17 +225,15 @@
   </main>
 
   <footer class="bg-white border-t border-slate-200 mt-12 py-4 text-center text-xs text-slate-400">
-    マイアプリ 統合アクセス解析ダッシュボード | Google Analytics 4 (G-ZKVVRD15VN) 連携
+    マイアプリ 統合アクセス解析ダッシュボード | Google Analytics 4 (G-ZKVVRD15VN) 実測連携
   </footer>
 
   <script>
-    // 各アプリのメタ情報（GitHub Pages URLなど）
     const APP_CATEGORIES = {
       health: {
         id: 'health',
         name: '総合健康管理',
         icon: '🏥',
-        color: 'emerald',
         badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
         barClass: 'bg-emerald-500',
         repoUrl: 'https://atugistreet-max.github.io/health-app/',
@@ -236,7 +243,6 @@
         id: 'finance',
         name: '財務管理',
         icon: '💰',
-        color: 'amber',
         badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
         barClass: 'bg-amber-500',
         repoUrl: 'https://atugistreet-max.github.io/finance-app/',
@@ -246,7 +252,6 @@
         id: 'history',
         name: '自分史サイト',
         icon: '📖',
-        color: 'indigo',
         badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
         barClass: 'bg-indigo-500',
         repoUrl: 'https://atugistreet-max.github.io/history-app/',
@@ -256,20 +261,18 @@
         id: 'news',
         name: 'ニュース統合版',
         icon: '📰',
-        color: 'blue',
         badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
         barClass: 'bg-blue-500',
         repoUrl: 'https://atugistreet-max.github.io/hadanonews/',
-        description: '暮らし・制度・お金・秦野市の重要情報'
+        description: '本日公開（GA4レポート集計待ち）'
       }
     };
 
-    // スプレッドシート設定
     const SHEETS_CONFIG = {
       general: {
         name: '総合管理アプリ（GA4プロパティ: 560441689）',
         sheetId: '1kGyEWXmzXkFC4UxzGzNRWs8QlNrhZS2jPVlIGwgkgJ8',
-        lastUpdated: '2026-11-05',
+        lastUpdated: '2026-11-02 22:18:10',
         fallbackRows: [
           { country: '日本', users: 10, sessions: 70, engaged: 35, rate: 50.0, duration: '3:34', events: 429, views: 148 },
           { country: 'アメリカ', users: 9, sessions: 9, engaged: 2, rate: 22.2, duration: '0:04', events: 38, views: 9 },
@@ -292,26 +295,26 @@
       }
     };
 
-    // GA4の「ページ タイトルとスクリーン クラス別」初期データ（スプレッドシートに「ページ別レポート」シートがない場合でも即座に分類表示）
-    const DEFAULT_PAGE_DATA = [
-      { title: '健康状態 統合管理ダッシュボード', app: 'health', views: 67, users: 8, sessions: 35, engaged: 19, events: 210 },
-      { title: '健康状態 統合管理', app: 'health', views: 2, users: 2, sessions: 2, engaged: 1, events: 8 },
-      { title: '資産・ライフプラン 統合管理', app: 'finance', views: 25, users: 5, sessions: 14, engaged: 7, events: 82 },
-      { title: '財務管理', app: 'finance', views: 7, users: 3, sessions: 5, engaged: 3, events: 25 },
-      { title: '資産・キャッシュフロー管理', app: 'finance', views: 2, users: 1, sessions: 2, engaged: 1, events: 9 },
-      { title: '不屈の人生賛歌：Nobuzi Kitabata 自分史（総合管理側計測）', app: 'history', views: 38, users: 6, sessions: 18, engaged: 6, events: 115 },
-      { title: '自分史サイト（専用プロパティ集計分）', app: 'history', views: 61, users: 3, sessions: 22, engaged: 11, events: 166 },
-      { title: 'ニュースダイジェスト統合版アーカイブ', app: 'news', views: 22, users: 2, sessions: 9, engaged: 4, events: 39 }
+    // ★ダミー数値を排除し、GA4画面で確認された実測値＋スプレッドシート実測値のみを定義
+    const VERIFIED_PAGE_DATA = [
+      { title: '健康状態 統合管理ダッシュボード', app: 'health', views: 67, source: 'GA4ホーム画面 実測（過去7日間）' },
+      { title: '健康状態 統合管理', app: 'health', views: 2, source: 'GA4ホーム画面 実測（過去7日間）' },
+      { title: '資産・ライフプラン 統合管理', app: 'finance', views: 25, source: 'GA4ホーム画面 実測（過去7日間）' },
+      { title: '財務管理', app: 'finance', views: 7, source: 'GA4ホーム画面 実測（過去7日間）' },
+      { title: '資産・キャッシュフロー管理', app: 'finance', views: 2, source: 'GA4ホーム画面 実測（過去7日間）' },
+      { title: '自分史サイト（専用スプレッドシート集計）', app: 'history', views: 61, source: '自分史スプレッドシート「要約」実測（28日間）' },
+      { title: '不屈の人生賛歌：Nobuzi Kitabata 自分史', app: 'history', views: 38, source: 'GA4ホーム画面 実測（過去7日間）' },
+      { title: 'ニュースダイジェスト統合版アーカイブ', app: 'news', views: 0, source: '本日公開（スプレッドシート未集計・明日以降反映）' }
     ];
 
     let appData = {
       general: { rows: [], lastUpdated: '' },
       history: { rows: [], lastUpdated: '' },
-      pages: [...DEFAULT_PAGE_DATA]
+      pages: [...VERIFIED_PAGE_DATA],
+      hasDynamicPageSheet: false
     };
     let currentTab = 'all';
 
-    // ページタイトルからどのアプリかを自動判定するルール
     function classifyPageTitle(title) {
       const t = (title || '').toLowerCase();
       if (t.includes('健康') || t.includes('health') || t.includes('バイタル') || t.includes('栄養')) return 'health';
@@ -343,7 +346,6 @@
       return isNaN(num) ? 0 : num;
     }
 
-    // スプレッドシートの「要約」シート取得
     async function fetchSheetSummary(key) {
       const config = SHEETS_CONFIG[key];
       const url = `https://docs.google.com/spreadsheets/d/${config.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('要約')}&_t=${Date.now()}`;
@@ -361,7 +363,7 @@
       return { rows: [...config.fallbackRows], lastUpdated: config.lastUpdated, fromFallback: true };
     }
 
-    // スプレッドシートに「ページ別レポート」または「ページ要約」がある場合、自動取得して更新
+    // スプレッドシートに「ページ別レポート」シートが追加された場合は自動取得
     async function fetchPageReportIfExists() {
       const sheetId = SHEETS_CONFIG.general.sheetId;
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('ページ別レポート')}&_t=${Date.now()}`;
@@ -371,6 +373,10 @@
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
         if (jsonMatch && jsonMatch[1]) {
           const data = JSON.parse(jsonMatch[1]);
+          // 既存の「要約」シートが誤って返ってきていないかチェック
+          const firstCell = data?.table?.rows?.[0]?.c?.[0]?.v || '';
+          if (firstCell.includes('国別')) return null;
+
           if (data && data.table && data.table.rows && data.table.rows.length > 5) {
             const parsedPages = [];
             let dataStarted = false;
@@ -384,19 +390,12 @@
               }
               if (dataStarted && col0) {
                 const views = toNum(col1);
-                const users = toNum(c[2] ? (c[2].f || c[2].v) : 1);
-                const sessions = toNum(c[3] ? (c[3].f || c[3].v) : Math.ceil(views * 0.5));
-                if (views > 0) {
-                  parsedPages.push({
-                    title: col0,
-                    app: classifyPageTitle(col0),
-                    views: views,
-                    users: users,
-                    sessions: sessions,
-                    engaged: Math.round(sessions * 0.5),
-                    events: views * 3
-                  });
-                }
+                parsedPages.push({
+                  title: col0,
+                  app: classifyPageTitle(col0),
+                  views: views,
+                  source: 'スプレッドシート「ページ別レポート」自動同期'
+                });
               }
             });
             if (parsedPages.length > 0) {
@@ -405,7 +404,7 @@
           }
         }
       } catch (e) {
-        // ページ別レポートシートが未作成の場合はデフォルトデータを使用
+        // 未作成時はnull
       }
       return null;
     }
@@ -470,24 +469,20 @@
 
       appData.general = genResult;
       appData.history = histResult;
+      appData.hasDynamicPageSheet = !!dynamicPages;
 
-      // 自分史サイトの最新PV数をページ内訳側にも反映
       const histTotal = calcCountrySummary(histResult.rows);
-      const basePages = dynamicPages ? dynamicPages : [...DEFAULT_PAGE_DATA];
-      const histPageIdx = basePages.findIndex(p => p.title.includes('専用プロパティ集計分'));
+      const basePages = dynamicPages ? dynamicPages : JSON.parse(JSON.stringify(VERIFIED_PAGE_DATA));
+      const histPageIdx = basePages.findIndex(p => p.title.includes('専用スプレッドシート集計'));
       if (histPageIdx !== -1 && histTotal.views > 0) {
         basePages[histPageIdx].views = histTotal.views;
-        basePages[histPageIdx].users = histTotal.users;
-        basePages[histPageIdx].sessions = histTotal.sessions;
-        basePages[histPageIdx].engaged = histTotal.engaged;
-        basePages[histPageIdx].events = histTotal.events;
       }
       appData.pages = basePages;
 
       if (!genResult.fromFallback || !histResult.fromFallback) {
         statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> スプレッドシート同期済`;
       } else {
-        statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-400"></span> GA4データ表示中`;
+        statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-400"></span> 実測データ表示中`;
       }
 
       renderDashboard();
@@ -506,22 +501,11 @@
       return totals;
     }
 
-    function calcAppStats(appKey) {
-      const filteredPages = appKey === 'all'
+    function calcAppViews(appKey) {
+      const filtered = appKey === 'all'
         ? appData.pages
         : appData.pages.filter(p => p.app === appKey);
-
-      const totals = filteredPages.reduce((acc, p) => {
-        acc.views += p.views;
-        acc.users += p.users;
-        acc.sessions += p.sessions;
-        acc.engaged += p.engaged;
-        acc.events += p.events;
-        return acc;
-      }, { views: 0, users: 0, sessions: 0, engaged: 0, events: 0 });
-
-      totals.rate = totals.sessions > 0 ? ((totals.engaged / totals.sessions) * 100).toFixed(1) : '0.0';
-      return totals;
+      return filtered.reduce((sum, p) => sum + p.views, 0);
     }
 
     function getMergedCountryRows() {
@@ -569,45 +553,101 @@
 
     function renderDashboard() {
       const linkEl = document.getElementById('app-direct-link');
+      const noticeEl = document.getElementById('notice-banner');
       const countryNoteEl = document.getElementById('country-note');
       let countryRows = [];
 
-      if (currentTab === 'all') {
-        document.getElementById('current-view-title').textContent = '🌐 全アプリ統合サマリー（総合健康管理・財務管理・自分史・ニュース）';
-        document.getElementById('last-updated-text').textContent = `総合管理更新: ${appData.general.lastUpdated} ／ 自分史更新: ${appData.history.lastUpdated}`;
-        document.getElementById('app-comparison-section').classList.remove('hidden');
-        document.getElementById('page-breakdown-badge').textContent = '全アプリ合計';
-        linkEl.classList.add('hidden');
-        countryNoteEl.textContent = '※全アプリの「要約」シート合算データ';
-        countryRows = getMergedCountryRows();
-        renderComparisonCards();
-      } else {
-        const meta = APP_CATEGORIES[currentTab];
-        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況`;
-        document.getElementById('last-updated-text').textContent = `${meta.description}（公開URL: ${meta.repoUrl}）`;
-        document.getElementById('app-comparison-section').classList.add('hidden');
-        document.getElementById('page-breakdown-badge').textContent = `${meta.name} のみ表示中`;
+      const genSum = calcCountrySummary(appData.general.rows);
+      const histSum = calcCountrySummary(appData.history.rows);
+      const mergedRows = getMergedCountryRows();
+      const mergedSum = calcCountrySummary(mergedRows);
 
+      if (currentTab === 'all') {
+        document.getElementById('current-view-title').textContent = '🌐 全アプリ統合サマリー（2つのスプレッドシート合算実測値）';
+        document.getElementById('last-updated-text').textContent = `総合管理シート最終実行: ${appData.general.lastUpdated} ／ 自分史シート最終更新: ${appData.history.lastUpdated}`;
+        document.getElementById('app-comparison-section').classList.remove('hidden');
+        document.getElementById('page-breakdown-badge').textContent = '全アプリ表示';
+        linkEl.classList.add('hidden');
+        noticeEl.classList.add('hidden');
+        countryNoteEl.textContent = '※2つのスプレッドシートの「要約」シート合算実測値（163 PV + 61 PV = 224 PV）';
+        countryRows = mergedRows;
+
+        setKpiValues(
+          mergedSum.views, '2シート合計実測PV',
+          mergedSum.users, '2シート合計ユーザー',
+          mergedSum.sessions, '2シート合計セッション',
+          mergedSum.engaged,
+          `${mergedSum.rate}%`,
+          mergedSum.events
+        );
+        renderComparisonCards();
+
+      } else if (currentTab === 'history') {
+        const meta = APP_CATEGORIES.history;
+        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況`;
+        document.getElementById('last-updated-text').textContent = `自分史スプレッドシート最終更新: ${appData.history.lastUpdated}`;
+        document.getElementById('app-comparison-section').classList.add('hidden');
+        document.getElementById('page-breakdown-badge').textContent = '自分史サイトのみ';
         linkEl.href = meta.repoUrl;
         linkEl.classList.remove('hidden');
+        noticeEl.classList.add('hidden');
+        countryRows = [...appData.history.rows].sort((a, b) => b.sessions - a.sessions);
+        countryNoteEl.textContent = '※「GA4レポート_自分史サイト」スプレッドシートの実測データ';
 
-        if (currentTab === 'history') {
-          countryRows = [...appData.history.rows].sort((a, b) => b.sessions - a.sessions);
-          countryNoteEl.textContent = '※「GA4レポート_自分史サイト」スプレッドシートの国別データ';
-        } else {
-          countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
-          countryNoteEl.textContent = '※「GA4レポート_総合管理アプリ」共通プロパティの国別データ';
-        }
+        setKpiValues(
+          histSum.views, '自分史シート実測PV (+総合側38)',
+          histSum.users, '自分史シート実測ユーザー',
+          histSum.sessions, '自分史シート実測セッション',
+          histSum.engaged,
+          `${histSum.rate}%`,
+          histSum.events
+        );
+
+      } else if (currentTab === 'news') {
+        const meta = APP_CATEGORIES.news;
+        const newsViews = calcAppViews('news');
+        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況`;
+        document.getElementById('last-updated-text').textContent = `本日公開（総合管理シート最終実行: ${appData.general.lastUpdated} ※公開前のため未反映）`;
+        document.getElementById('app-comparison-section').classList.add('hidden');
+        document.getElementById('page-breakdown-badge').textContent = 'ニュース統合版のみ';
+        linkEl.href = meta.repoUrl;
+        linkEl.classList.remove('hidden');
+        noticeEl.classList.remove('hidden');
+        countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
+        countryNoteEl.textContent = '※参考：「GA4レポート_総合管理アプリ」全体の国別データ（2026-11-02時点）';
+
+        setKpiValues(
+          newsViews, '本日公開（明日以降反映）',
+          '0', 'スプレッドシート集計待ち',
+          '0', 'スプレッドシート集計待ち',
+          '0',
+          '0.0%',
+          '0'
+        );
+
+      } else {
+        // 総合健康管理 (health) または 財務管理 (finance)
+        const meta = APP_CATEGORIES[currentTab];
+        const appViews = calcAppViews(currentTab);
+        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況`;
+        document.getElementById('last-updated-text').textContent = `${meta.description}（総合管理シート最終実行: ${appData.general.lastUpdated}）`;
+        document.getElementById('app-comparison-section').classList.add('hidden');
+        document.getElementById('page-breakdown-badge').textContent = `${meta.name} のみ`;
+        linkEl.href = meta.repoUrl;
+        linkEl.classList.remove('hidden');
+        noticeEl.classList.add('hidden');
+        countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
+        countryNoteEl.textContent = '※「GA4レポート_総合管理アプリ」共通プロパティ全体の国別データ';
+
+        setKpiValues(
+          appViews, 'GA4ページ別実測PV（7日間）',
+          `全体 ${genSum.users}`, '※共通プロパティ全体の実測値',
+          `全体 ${genSum.sessions}`, '※共通プロパティ全体の実測値',
+          `全体 ${genSum.engaged}`,
+          `${genSum.rate}%`,
+          `全体 ${genSum.events}`
+        );
       }
-
-      // KPI表示更新（アプリ別の数値を使用）
-      const stats = calcAppStats(currentTab);
-      document.getElementById('kpi-views').textContent = stats.views.toLocaleString();
-      document.getElementById('kpi-users').textContent = stats.users.toLocaleString();
-      document.getElementById('kpi-sessions').textContent = stats.sessions.toLocaleString();
-      document.getElementById('kpi-engaged').textContent = stats.engaged.toLocaleString();
-      document.getElementById('kpi-rate').textContent = `${stats.rate}%`;
-      document.getElementById('kpi-events').textContent = stats.events.toLocaleString();
 
       renderPageTable();
       const countryTotalSessions = countryRows.reduce((s, r) => s + r.sessions, 0);
@@ -615,42 +655,48 @@
       renderCountryTable(countryRows);
     }
 
+    function setKpiValues(views, viewsSub, users, usersSub, sessions, sessionsSub, engaged, rate, events) {
+      document.getElementById('kpi-views').textContent = typeof views === 'number' ? views.toLocaleString() : views;
+      document.getElementById('kpi-views-sub').textContent = viewsSub;
+      document.getElementById('kpi-users').textContent = typeof users === 'number' ? users.toLocaleString() : users;
+      document.getElementById('kpi-users-sub').textContent = usersSub;
+      document.getElementById('kpi-sessions').textContent = typeof sessions === 'number' ? sessions.toLocaleString() : sessions;
+      document.getElementById('kpi-sessions-sub').textContent = sessionsSub;
+      document.getElementById('kpi-engaged').textContent = typeof engaged === 'number' ? engaged.toLocaleString() : engaged;
+      document.getElementById('kpi-rate').textContent = rate;
+      document.getElementById('kpi-events').textContent = typeof events === 'number' ? events.toLocaleString() : events;
+    }
+
     function renderComparisonCards() {
       const container = document.getElementById('app-comparison-cards');
-      const allStats = calcAppStats('all');
-      const totalViews = allStats.views || 1;
+      const totalViews = calcAppViews('all') || 1;
 
       container.innerHTML = Object.keys(APP_CATEGORIES).map(key => {
         const meta = APP_CATEGORIES[key];
-        const st = calcAppStats(key);
-        const share = Math.round((st.views / totalViews) * 100);
+        const views = calcAppViews(key);
+        const share = Math.round((views / totalViews) * 100);
+        const isPending = key === 'news' && views === 0;
 
         return `
           <div onclick="switchTab('${key}')" class="cursor-pointer border border-slate-200 rounded-xl p-4 bg-slate-50/60 hover:bg-white hover:shadow-md transition flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-1.5">
                 <span class="font-bold text-slate-800 text-sm flex items-center gap-1.5">${meta.icon} ${meta.name}</span>
-                <span class="text-xs font-bold px-2 py-0.5 rounded-full border ${meta.badgeClass}">PVシェア ${share}%</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full border ${meta.badgeClass}">
+                  ${isPending ? '集計待ち' : `PVシェア ${share}%`}
+                </span>
               </div>
               <p class="text-[11px] text-slate-400 mb-3">${meta.description}</p>
             </div>
             <div>
-              <div class="grid grid-cols-3 gap-1.5 text-center mb-3">
-                <div class="bg-white p-2 rounded-lg border border-slate-100">
-                  <div class="text-[10px] text-slate-400">表示回数</div>
-                  <div class="font-bold text-emerald-600 text-sm">${st.views}</div>
-                </div>
-                <div class="bg-white p-2 rounded-lg border border-slate-100">
-                  <div class="text-[10px] text-slate-400">ユーザー</div>
-                  <div class="font-bold text-slate-800 text-sm">${st.users}</div>
-                </div>
-                <div class="bg-white p-2 rounded-lg border border-slate-100">
-                  <div class="text-[10px] text-slate-400">セッション</div>
-                  <div class="font-bold text-indigo-600 text-sm">${st.sessions}</div>
+              <div class="bg-white p-3 rounded-lg border border-slate-100 text-center mb-3">
+                <div class="text-[11px] text-slate-400">確認済み表示回数 (PV)</div>
+                <div class="font-bold ${isPending ? 'text-slate-400' : 'text-emerald-600'} text-xl mt-0.5">
+                  ${views} <span class="text-xs font-normal">回</span>
                 </div>
               </div>
               <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                <div class="${meta.barClass} h-full rounded-full" style="width: ${Math.max(share, 4)}%"></div>
+                <div class="${meta.barClass} h-full rounded-full" style="width: ${views > 0 ? Math.max(share, 4) : 0}%"></div>
               </div>
             </div>
           </div>
@@ -668,7 +714,7 @@
 
       tbody.innerHTML = pages.map(p => {
         const meta = APP_CATEGORIES[p.app] || APP_CATEGORIES.health;
-        const pct = ((p.views / totalViews) * 100).toFixed(1);
+        const pct = p.views > 0 ? ((p.views / totalViews) * 100).toFixed(1) : '0.0';
         return `
           <tr class="hover:bg-slate-50 transition">
             <td class="py-3 px-4 whitespace-nowrap">
@@ -677,12 +723,12 @@
               </span>
             </td>
             <td class="py-3 px-4 font-bold text-slate-800">${p.title}</td>
-            <td class="py-3 px-3 text-right font-bold text-emerald-600">${p.views.toLocaleString()}</td>
-            <td class="py-3 px-3 text-right font-medium text-slate-700">${p.users.toLocaleString()}</td>
+            <td class="py-3 px-4 text-xs text-slate-500">${p.source}</td>
+            <td class="py-3 px-3 text-right font-bold ${p.views > 0 ? 'text-emerald-600' : 'text-slate-400'}">${p.views.toLocaleString()}</td>
             <td class="py-3 px-4">
               <div class="flex items-center gap-2">
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div class="${meta.barClass} h-full rounded-full" style="width: ${Math.max(pct, 3)}%"></div>
+                  <div class="${meta.barClass} h-full rounded-full" style="width: ${p.views > 0 ? Math.max(pct, 3) : 0}%"></div>
                 </div>
                 <span class="text-xs text-slate-500 font-mono w-12 text-right">${pct}%</span>
               </div>
@@ -733,7 +779,6 @@
       }).join('');
     }
 
-    // 初回実行
     loadAllData();
   </script>
 </body>
