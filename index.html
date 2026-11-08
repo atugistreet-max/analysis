@@ -61,7 +61,7 @@
   <!-- メインコンテンツ -->
   <main class="max-w-6xl w-full mx-auto px-4 py-6 flex-1">
 
-    <!-- アプリ切り替えタブ（全5アプリ＋全体サマリー） -->
+    <!-- アプリ切り替えタブ -->
     <div class="bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 flex flex-wrap gap-1.5 mb-6">
       <button onclick="switchTab('all')" id="tab-all" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition bg-indigo-600 text-white shadow-sm">
         🌐 全体サマリー
@@ -94,7 +94,7 @@
           🚀 この公開アプリを開く ↗
         </a>
         <a id="sheet-direct-link" href="#" target="_blank" rel="noopener" class="hidden text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold px-3 py-1 rounded-full transition">
-          📊 連携スプレッドシートを開く ↗
+          📊 GA4レポートシートを開く ↗
         </a>
         <span class="text-xs bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-full shadow-sm">
           測定ID: <strong>G-ZKVVRD15VN</strong>
@@ -102,27 +102,39 @@
       </div>
     </div>
 
-    <!-- 新規公開サイト・未集計データに関する案内バナー -->
-    <div id="notice-banner" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-xs sm:text-sm text-amber-900">
-      <p id="notice-title" class="font-bold mb-1">ℹ️ 本日公開されたアプリのアクセス数値について</p>
-      <p id="notice-body" class="text-amber-800 leading-relaxed"></p>
+    <!-- ニュース統合版用：GA4シート未設定時の案内＆ワンクリック連携バー -->
+    <div id="news-sheet-setup" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-xs sm:text-sm text-blue-900">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <p class="font-bold mb-1">💡 「ニュース統合版（/hadanonews/）」専用GA4レポートシートの連携</p>
+          <p class="text-blue-800 text-xs leading-relaxed">
+            ニュース統合版用のGA4レポートシートを作成したら、そのスプレッドシートURL（またはID）を右の欄に貼り付けて「連携保存」を押すと、即座に実績が反映されます。
+          </p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <input type="text" id="news-sheet-input" placeholder="スプレッドシートURLまたはID" class="px-3 py-1.5 rounded-lg border border-blue-300 text-xs w-56 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button onclick="saveNewsSheetId()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shrink-0">
+            連携保存
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- ムスリム問題ウォッチ アーカイブ データベース登録状況パネル（ムスリム問題タブ選択時に表示） -->
+    <!-- ムスリム問題ウォッチ アーカイブ データベース登録状況パネル -->
     <section id="muslim-db-section" class="hidden bg-white rounded-xl shadow-sm border border-rose-200 p-4 sm:p-5 mb-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
         <div>
           <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <span>🗄️</span> 「ムスリム問題ウォッチ アーカイブ」スプレッドシート 登録データ内訳
+            <span>🗄️</span> 「ムスリム問題ウォッチ アーカイブ」記事データベース登録内訳
           </h3>
-          <p class="text-xs text-slate-500 mt-0.5">※GA4のアクセス集計（0件）とは別に、現在スプレッドシートに登録されている記事・SNS記録の件数を表示しています</p>
+          <p class="text-xs text-slate-500 mt-0.5">※下のGA4アクセス実績（70 PV等）とあわせて、現在アーカイブに登録されている記事・SNS記録の件数を表示しています</p>
         </div>
         <div class="bg-rose-50 border border-rose-200 text-rose-800 px-3 py-1.5 rounded-lg text-xs font-bold shrink-0">
           総登録件数: <span id="muslim-total-records" class="text-base">58</span> 件
         </div>
       </div>
       <div id="muslim-category-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <!-- JSで8カテゴリの件数を描画 -->
+        <!-- JSで描画 -->
       </div>
     </section>
 
@@ -160,24 +172,24 @@
       </div>
     </section>
 
-    <!-- 5つのアプリ別 比較カードセクション（全体表示時のみ表示） -->
+    <!-- 5つのアプリ別 比較カードセクション -->
     <section id="app-comparison-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-          <span>⚖️</span> 全5アプリ 実測アクセス比較（GA4実測値 ＋ スプレッドシート連携）
+          <span>⚖️</span> 全5アプリ 実測アクセス比較（GA4レポートシート 실시간同期）
         </h3>
-        <span class="text-xs text-slate-400">※推定値を排除し、確認済みの実測値のみを表示（カードクリックで詳細へ）</span>
+        <span class="text-xs text-slate-400">カードをクリックすると各アプリの国別詳細・内訳に切り替わります</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5" id="app-comparison-cards">
         <!-- JSで動的描画 -->
       </div>
     </section>
 
-    <!-- ページタイトル別の内訳 -->
+    <!-- ページタイトル・レポート別の内訳 -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
         <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-          <span>📑</span> ページタイトル別 アクセス内訳（実測データのみ）
+          <span>📑</span> アプリ・ページ別 アクセス内訳
         </h3>
         <span id="page-breakdown-badge" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-medium">全ページ</span>
       </div>
@@ -186,8 +198,8 @@
           <thead>
             <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs">
               <th class="py-2.5 px-4">アプリ分類</th>
-              <th class="py-2.5 px-4">ページタイトル（画面名）</th>
-              <th class="py-2.5 px-4">データの出典・状態</th>
+              <th class="py-2.5 px-4">ページタイトル / 集計対象</th>
+              <th class="py-2.5 px-4">データの出典・最終実行</th>
               <th class="py-2.5 px-3 text-right">表示回数 (PV)</th>
               <th class="py-2.5 px-4 w-44">表示シェア</th>
             </tr>
@@ -207,7 +219,7 @@
         <h3 class="text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
           <span>🌍</span> 国・地域別 アクセス割合（スプレッドシート実測）
         </h3>
-        <p id="country-note" class="text-[11px] text-slate-400 mb-4">※スプレッドシート「要約」シートの国別データ</p>
+        <p id="country-note" class="text-[11px] text-slate-400 mb-4">※スプレッドシートの国別データ</p>
         <div id="country-bars" class="space-y-3.5">
           <!-- JSで動的描画 -->
         </div>
@@ -250,6 +262,15 @@
   </footer>
 
   <script>
+    // スプレッドシートID定義（分割結合）
+    const GENERAL_GA_SHEET_ID = ['1kGyEWXmzXkFC4UxzGzNRW', 's8QlNrhZS2jPVlIGwgkgJ8'].join('');
+    const HISTORY_GA_SHEET_ID = ['1WL31c7Sh2sDyOve63Ioq7T', 'FiGe3Mmsy64V4W8wY-6xc'].join('');
+    const MUSLIM_GA_SHEET_ID  = ['15Y7_aim6GN2f9MQC3imuNX', 'h9oH_sYaeBpeMz0zWD-cU'].join('');
+    const MUSLIM_DB_SHEET_ID  = ['1oHSo8Jl4R3IIPBtGxLwd', 'QAv5czD1WTRc0VMKvsyYtlU'].join('');
+
+    // ニュース統合版用のGA4レポートシートID（作成後にここへ入れるか、画面上の入力欄から保存可能）
+    let NEWS_GA_SHEET_ID = localStorage.getItem('news_ga_sheet_id') || '';
+
     // 全5アプリの定義
     const APP_CATEGORIES = {
       health: {
@@ -259,7 +280,7 @@
         badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
         barClass: 'bg-emerald-500',
         repoUrl: 'https://atugistreet-max.github.io/health-app/',
-        sheetUrl: '',
+        sheetUrl: `https://docs.google.com/spreadsheets/d/${GENERAL_GA_SHEET_ID}/edit`,
         description: '体重・体組成・血圧・栄養ログ統合管理'
       },
       finance: {
@@ -269,7 +290,7 @@
         badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
         barClass: 'bg-amber-500',
         repoUrl: 'https://atugistreet-max.github.io/finance-app/',
-        sheetUrl: '',
+        sheetUrl: `https://docs.google.com/spreadsheets/d/${GENERAL_GA_SHEET_ID}/edit`,
         description: '資産・ライフプラン・キャッシュフロー管理'
       },
       history: {
@@ -279,7 +300,7 @@
         badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
         barClass: 'bg-indigo-500',
         repoUrl: 'https://atugistreet-max.github.io/history-app/',
-        sheetUrl: 'https://docs.google.com/spreadsheets/d/' + ['1WL31c7Sh2sDyOve63Ioq7T', 'FiGe3Mmsy64V4W8wY-6xc'].join('') + '/edit',
+        sheetUrl: `https://docs.google.com/spreadsheets/d/${HISTORY_GA_SHEET_ID}/edit`,
         description: '不屈の人生賛歌・自分史アーカイブ'
       },
       news: {
@@ -289,8 +310,8 @@
         badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
         barClass: 'bg-blue-500',
         repoUrl: 'https://atugistreet-max.github.io/hadanonews/',
-        sheetUrl: '',
-        description: '本日公開（GA4レポート集計待ち）'
+        sheetUrl: NEWS_GA_SHEET_ID ? `https://docs.google.com/spreadsheets/d/${NEWS_GA_SHEET_ID}/edit` : '',
+        description: '暮らし・制度・お金・秦野市の重要情報'
       },
       muslim: {
         id: 'muslim',
@@ -299,39 +320,63 @@
         badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
         barClass: 'bg-rose-500',
         repoUrl: 'https://atugistreet-max.github.io/muslim/',
-        sheetUrl: 'https://docs.google.com/spreadsheets/d/' + ['1oHSo8Jl4R3IIPBtGxLwd', 'QAv5czD1WTRc0VMKvsyYtlU'].join('') + '/edit',
-        description: '本日公開（全58件・8カテゴリ収録DB）'
+        sheetUrl: `https://docs.google.com/spreadsheets/d/${MUSLIM_GA_SHEET_ID}/edit`,
+        description: '国内各地の動向・SNS投稿・報道記録DB'
       }
     };
 
+    // 各GA4スプレッドシートの設定と最新の実測フォールバックデータ
     const SHEETS_CONFIG = {
       general: {
-        name: '総合管理アプリ',
-        sheetId: ['1kGyEWXmzXkFC4UxzGzNRW', 's8QlNrhZS2jPVlIGwgkgJ8'].join(''),
+        name: 'GA4レポート_総合管理アプリ',
+        sheetId: GENERAL_GA_SHEET_ID,
         lastUpdated: '2026-11-02 22:18:10',
         fallbackRows: [
-          { country: '日本', users: 10, sessions: 70, engaged: 35, rate: 50.0, duration: '3:34', events: 429, views: 148 },
-          { country: 'アメリカ', users: 9, sessions: 9, engaged: 2, rate: 22.2, duration: '0:04', events: 38, views: 9 },
-          { country: '（国不明）', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 4, views: 1 },
-          { country: 'ドイツ', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 3, views: 1 },
-          { country: 'イラン', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 4, views: 1 },
-          { country: 'オランダ', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 3, views: 1 },
-          { country: 'セーシェル', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 3, views: 1 },
-          { country: 'イギリス', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '0:00', events: 4, views: 1 }
+          { country: '日本', users: 10, sessions: 70, engaged: 35, rate: 50.0, duration: '03:34', events: 429, views: 148 },
+          { country: 'アメリカ', users: 9, sessions: 9, engaged: 2, rate: 22.2, duration: '00:04', events: 38, views: 9 },
+          { country: '（国不明）', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 },
+          { country: 'ドイツ', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 3, views: 1 },
+          { country: 'イラン', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 },
+          { country: 'オランダ', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 3, views: 1 },
+          { country: 'セーシェル', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 3, views: 1 },
+          { country: 'イギリス', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 }
         ]
       },
       history: {
-        name: '自分史サイト',
-        sheetId: ['1WL31c7Sh2sDyOve63Ioq7T', 'FiGe3Mmsy64V4W8wY-6xc'].join(''),
+        name: 'GA4レポート_自分史サイト',
+        sheetId: HISTORY_GA_SHEET_ID,
         lastUpdated: '2026/11/06',
         fallbackRows: [
-          { country: '日本', users: 2, sessions: 21, engaged: 11, rate: 52.38, duration: '02:20', events: 162, views: 60 },
-          { country: '（未設定）', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 }
+          { country: '日本', users: 2, sessions: 21, engaged: 11, rate: 52.4, duration: '02:20', events: 162, views: 60 },
+          { country: '（国不明）', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 }
         ]
       },
+      muslim: {
+        name: 'GA4レポート_ムスリムウォッチ',
+        sheetId: MUSLIM_GA_SHEET_ID,
+        lastUpdated: '2026-11-08 11:13:28',
+        // 2026-11-08 11:13:28 実行済みの実測データ（日本 53PV、合計 70PV）
+        fallbackRows: [
+          { country: '日本', users: 15, sessions: 28, engaged: 13, rate: 46.4, duration: '02:27', events: 350, views: 53 },
+          { country: 'アメリカ', users: 8, sessions: 8, engaged: 1, rate: 12.5, duration: '00:04', events: 33, views: 8 },
+          { country: 'イラン', users: 2, sessions: 2, engaged: 0, rate: 0.0, duration: '00:00', events: 8, views: 2 },
+          { country: 'セーシェル', users: 2, sessions: 2, engaged: 0, rate: 0.0, duration: '00:00', events: 8, views: 2 },
+          { country: 'ドイツ', users: 2, sessions: 2, engaged: 0, rate: 0.0, duration: '00:03', events: 5, views: 1 },
+          { country: 'オーストリア', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 },
+          { country: 'ベラルーシ', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:07', events: 5, views: 1 },
+          { country: 'スペイン', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 3, views: 1 },
+          { country: 'イギリス', users: 1, sessions: 1, engaged: 0, rate: 0.0, duration: '00:00', events: 4, views: 1 }
+        ]
+      },
+      news: {
+        name: 'GA4レポート_ニュース統合版',
+        sheetId: NEWS_GA_SHEET_ID,
+        lastUpdated: 'シート未連携',
+        fallbackRows: []
+      },
       muslimArchive: {
-        name: 'ムスリム問題ウォッチ アーカイブ',
-        sheetId: ['1oHSo8Jl4R3IIPBtGxLwd', 'QAv5czD1WTRc0VMKvsyYtlU'].join(''),
+        name: 'ムスリム問題ウォッチ 記事DB',
+        sheetId: MUSLIM_DB_SHEET_ID,
         fallbackCategories: [
           { category: '神社仏閣の火災・破壊', icon: '⛩️', count: 15 },
           { category: '子供を利用した浸透工作', icon: '🧒', count: 9 },
@@ -345,49 +390,65 @@
       }
     };
 
-    // ★ダミー数値を排除し、確認済みの実測データのみを定義（本日公開の2サイトは正直に「0 PV」）
-    const VERIFIED_PAGE_DATA = [
-      { title: '健康状態 統合管理ダッシュボード', app: 'health', views: 67, source: 'GA4ホーム画面 実測（過去7日間）' },
-      { title: '健康状態 統合管理', app: 'health', views: 2, source: 'GA4ホーム画面 実測（過去7日間）' },
-      { title: '資産・ライフプラン 統合管理', app: 'finance', views: 25, source: 'GA4ホーム画面 実測（過去7日間）' },
-      { title: '財務管理', app: 'finance', views: 7, source: 'GA4ホーム画面 実測（過去7日間）' },
-      { title: '資産・キャッシュフロー管理', app: 'finance', views: 2, source: 'GA4ホーム画面 実測（過去7日間）' },
-      { title: '自分史サイト（専用スプレッドシート集計）', app: 'history', views: 61, source: '自分史スプレッドシート「要約」実測（28日間）' },
-      { title: '不屈の人生賛歌：Nobuzi Kitabata 自分史', app: 'history', views: 38, source: 'GA4ホーム画面 実測（過去7日間）' },
-      { title: 'ニュースダイジェスト統合版アーカイブ', app: 'news', views: 0, source: '本日公開（アクセスデータ未集計・明日以降反映）' },
-      { title: 'ムスリム問題ウォッチ アーカイブ', app: 'muslim', views: 0, source: '本日公開（アクセスデータなし・DB登録58件）' }
+    // 初期ページ別実測データ（ムスリムウォッチや自分史はシート同期後に最新値で自動更新）
+    const BASE_PAGE_DATA = [
+      { title: '健康状態 統合管理ダッシュボード', app: 'health', views: 67, source: 'GA4ホーム画面 実測' },
+      { title: '健康状態 統合管理', app: 'health', views: 2, source: 'GA4ホーム画面 実測' },
+      { title: '資産・ライフプラン 統合管理', app: 'finance', views: 25, source: 'GA4ホーム画面 実測' },
+      { title: '財務管理', app: 'finance', views: 7, source: 'GA4ホーム画面 実測' },
+      { title: '資産・キャッシュフロー管理', app: 'finance', views: 2, source: 'GA4ホーム画面 実測' },
+      { title: '自分史サイト（専用GA4シート集計）', app: 'history', views: 61, source: 'GA4レポート_自分史サイト 実測' },
+      { title: '不屈の人生賛歌：Nobuzi Kitabata 自分史', app: 'history', views: 38, source: 'GA4ホーム画面 実測' },
+      { title: 'ムスリム問題ウォッチ（/muslim/ 配下集計）', app: 'muslim', views: 70, source: 'GA4レポート_ムスリムウォッチ（2026-11-08 11:13 実測）' },
+      { title: 'ニュースダイジェスト統合版（/hadanonews/）', app: 'news', views: 0, source: '専用GA4レポートシート作成待ち' }
     ];
 
     let appData = {
       general: { rows: [], lastUpdated: '' },
       history: { rows: [], lastUpdated: '' },
+      muslim:  { rows: [], lastUpdated: '' },
+      news:    { rows: [], lastUpdated: '' },
       muslimCategories: [...SHEETS_CONFIG.muslimArchive.fallbackCategories],
-      pages: [...VERIFIED_PAGE_DATA]
+      pages: [...BASE_PAGE_DATA]
     };
     let currentTab = 'all';
 
-    function classifyPageTitle(title) {
-      const t = (title || '').toLowerCase();
-      if (t.includes('ムスリム') || t.includes('muslim') || t.includes('イスラム')) return 'muslim';
-      if (t.includes('ニュース') || t.includes('秦野') || t.includes('news') || t.includes('ダイジェスト')) return 'news';
-      if (t.includes('自分史') || t.includes('人生賛歌') || t.includes('history')) return 'history';
-      if (t.includes('財務') || t.includes('資産') || t.includes('ライフプラン') || t.includes('キャッシュフロー') || t.includes('finance')) return 'finance';
-      if (t.includes('健康') || t.includes('health') || t.includes('バイタル') || t.includes('栄養')) return 'health';
-      return 'health';
+    // 英語国名を日本語に統一
+    function translateCountryName(rawName) {
+      const name = (rawName || '').trim();
+      const dict = {
+        'Japan': '日本',
+        'United States': 'アメリカ',
+        'Germany': 'ドイツ',
+        'Iran': 'イラン',
+        'Seychelles': 'セーシェル',
+        'Austria': 'オーストリア',
+        'Belarus': 'ベラルーシ',
+        'Spain': 'スペイン',
+        'United Kingdom': 'イギリス',
+        'Netherlands': 'オランダ',
+        '(not set)': '（国不明）',
+        '（未設定）': '（国不明）'
+      };
+      return dict[name] || name;
     }
 
     function getCountryFlag(country) {
+      const c = translateCountryName(country);
       const flags = {
-        '日本': '🇯🇵', 'Japan': '🇯🇵',
-        'アメリカ': '🇺🇸', 'United States': '🇺🇸',
-        'ドイツ': '🇩🇪', 'Germany': '🇩🇪',
-        'イギリス': '🇬🇧', 'United Kingdom': '🇬🇧',
-        'オランダ': '🇳🇱', 'Netherlands': '🇳🇱',
-        'イラン': '🇮🇷', 'Iran': '🇮🇷',
-        'セーシェル': '🇸🇨', 'Seychelles': '🇸🇨',
-        '（国不明）': '🌐', '（未設定）': '🌐', '(not set)': '🌐'
+        '日本': '🇯🇵',
+        'アメリカ': '🇺🇸',
+        'ドイツ': '🇩🇪',
+        'イギリス': '🇬🇧',
+        'オランダ': '🇳🇱',
+        'イラン': '🇮🇷',
+        'セーシェル': '🇸🇨',
+        'オーストリア': '🇦🇹',
+        'ベラルーシ': '🇧🇾',
+        'スペイン': '🇪🇸',
+        '（国不明）': '🌐'
       };
-      return flags[country] || '🏳️';
+      return flags[c] || '🏳️';
     }
 
     function getMuslimCategoryIcon(cat) {
@@ -411,29 +472,166 @@
       return isNaN(num) ? 0 : num;
     }
 
-    async function fetchSheetSummary(key) {
+    // 秒数とユーザー数から「1人あたり平均エンゲージメント時間 (分:秒)」を算出
+    function formatAvgDuration(totalSeconds, users) {
+      const sec = Math.round(totalSeconds / Math.max(users, 1));
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    // GViz JSON取得ヘルパー
+    async function fetchGvizTab(sheetId, sheetName) {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&_t=${Date.now()}`;
+      const res = await fetch(url, { cache: 'no-store' });
+      const text = await res.text();
+      const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+      if (jsonMatch && jsonMatch[1]) {
+        return JSON.parse(jsonMatch[1]);
+      }
+      return null;
+    }
+
+    // 「国別レポート」タブと「要約」タブの両方に対応したハイブリッド取得関数
+    async function fetchGAReportSheet(key) {
       const config = SHEETS_CONFIG[key];
-      const url = `https://docs.google.com/spreadsheets/d/${config.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('要約')}&_t=${Date.now()}`;
+      if (!config || !config.sheetId) {
+        return { rows: [], lastUpdated: '未設定', fromFallback: true };
+      }
+
+      // 1. まず「国別レポート」タブから直接最新の実測値を取得（要約タブの数式未評価・空欄化を回避）
       try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
-        if (jsonMatch && jsonMatch[1]) {
-          const data = JSON.parse(jsonMatch[1]);
-          return parseGvizSummary(data, config);
+        const rawReport = await fetchGvizTab(config.sheetId, '国別レポート');
+        if (rawReport && rawReport.table && rawReport.table.rows) {
+          const parsedFromRaw = parseRawCountryReport(rawReport, config.lastUpdated);
+          if (parsedFromRaw.rows.length > 0) {
+            return { ...parsedFromRaw, fromFallback: false };
+          }
         }
       } catch (e) {
-        console.warn(`Fallback used for ${key}:`, e);
+        console.warn(`[${key}] 国別レポート direct fetch skipped:`, e);
+      }
+
+      // 2. 次に「要約」タブから取得
+      try {
+        const summaryReport = await fetchGvizTab(config.sheetId, '要約');
+        if (summaryReport && summaryReport.table && summaryReport.table.rows) {
+          const parsedFromSummary = parseGvizSummary(summaryReport, config);
+          if (parsedFromSummary.rows.length > 0) {
+            return parsedFromSummary;
+          }
+        }
+      } catch (e) {
+        console.warn(`[${key}] 要約 fetch skipped:`, e);
+      }
+
+      return { rows: [...config.fallbackRows], lastUpdated: config.lastUpdated, fromFallback: true };
+    }
+
+    // 「国別レポート」タブ（GA4アドオン出力形式）のパーサー
+    function parseRawCountryReport(data, defaultUpdated) {
+      let lastUpdated = defaultUpdated;
+      const rows = [];
+      let inBreakdown = false;
+
+      data.table.rows.forEach(r => {
+        const c = r.c || [];
+        const getVal = (idx) => (c[idx] ? (c[idx].f || c[idx].v || '') : '').toString().trim();
+        const col0 = getVal(0);
+        const col1 = getVal(1);
+
+        if (col0 === 'Last Run On' && col1) {
+          lastUpdated = col1;
+          return;
+        }
+        if (col0 === 'country' && col1 === 'activeUsers') {
+          inBreakdown = true;
+          return;
+        }
+        if (inBreakdown && col0) {
+          const users = toNum(getVal(1));
+          const sessions = toNum(getVal(2));
+          const engaged = toNum(getVal(3));
+          let rawRate = toNum(getVal(4));
+          const rate = rawRate <= 1 && rawRate > 0 ? +(rawRate * 100).toFixed(1) : +rawRate.toFixed(1);
+          const durationSec = toNum(getVal(5));
+          const events = toNum(getVal(6));
+          const views = toNum(getVal(7));
+
+          if (users > 0 || sessions > 0 || views > 0) {
+            rows.push({
+              country: translateCountryName(col0),
+              users,
+              sessions,
+              engaged,
+              rate,
+              duration: formatAvgDuration(durationSec, users),
+              events,
+              views
+            });
+          }
+        }
+      });
+
+      return { rows, lastUpdated };
+    }
+
+    // 「要約」タブのパーサー
+    function parseGvizSummary(data, config) {
+      let lastUpdated = config.lastUpdated;
+      const parsedRows = [];
+
+      if (data && data.table && data.table.rows) {
+        data.table.rows.forEach(r => {
+          const c = r.c || [];
+          const getVal = (idx) => (c[idx] ? (c[idx].f || c[idx].v || '') : '').toString().trim();
+          const col0 = getVal(0);
+          const col1 = getVal(1);
+
+          if (col0 === '最終更新' && col1) {
+            lastUpdated = col1;
+            return;
+          }
+          if (!col0 || col0 === '国' || col0 === '合計' || col0.includes('GA4要約') || col0.startsWith('※') || col0.startsWith('・') || col0 === '読み方メモ') {
+            return;
+          }
+
+          const users = toNum(getVal(1));
+          const sessions = toNum(getVal(2));
+          const views = toNum(getVal(7));
+          if (users === 0 && sessions === 0 && views === 0) return;
+
+          let rawRate = getVal(4);
+          let rateNum = toNum(rawRate);
+          if (rateNum > 0 && rateNum <= 1 && !rawRate.includes('%')) {
+            rateNum = +(rateNum * 100).toFixed(1);
+          }
+
+          parsedRows.push({
+            country: translateCountryName(col0),
+            users: users,
+            sessions: sessions,
+            engaged: toNum(getVal(3)),
+            rate: rateNum,
+            duration: getVal(5) || '00:00',
+            events: toNum(getVal(6)),
+            views: views
+          });
+        });
+      }
+
+      if (parsedRows.length > 0) {
+        return { rows: parsedRows, lastUpdated, fromFallback: false };
       }
       return { rows: [...config.fallbackRows], lastUpdated: config.lastUpdated, fromFallback: true };
     }
 
-    // ムスリム問題ウォッチのスプレッドシートから登録件数をリアルタイム集計
+    // ムスリム問題ウォッチの記事DBから登録件数を集計
     async function fetchMuslimArchiveCounts() {
       const sheetId = SHEETS_CONFIG.muslimArchive.sheetId;
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=0&_t=${Date.now()}`;
       try {
-        const res = await fetch(url);
+        const res = await fetch(url, { cache: 'no-store' });
         const text = await res.text();
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
         if (jsonMatch && jsonMatch[1]) {
@@ -459,136 +657,77 @@
           }
         }
       } catch (e) {
-        // 共有設定が制限付きの場合は内蔵の58件データを使用
+        // フォールバック使用
       }
       return [...SHEETS_CONFIG.muslimArchive.fallbackCategories];
     }
 
-    // スプレッドシートに「ページ別レポート」シートが追加された場合は自動取得
-    async function fetchPageReportIfExists() {
-      const sheetId = SHEETS_CONFIG.general.sheetId;
-      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('ページ別レポート')}&_t=${Date.now()}`;
-      try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
-        if (jsonMatch && jsonMatch[1]) {
-          const data = JSON.parse(jsonMatch[1]);
-          const firstCell = data?.table?.rows?.[0]?.c?.[0]?.v || '';
-          if (firstCell.includes('国別')) return null;
-
-          if (data && data.table && data.table.rows && data.table.rows.length > 5) {
-            const parsedPages = [];
-            let dataStarted = false;
-            data.table.rows.forEach(r => {
-              const c = r.c || [];
-              const col0 = (c[0] ? (c[0].f || c[0].v || '') : '').toString().trim();
-              const col1 = (c[1] ? (c[1].f || c[1].v || '') : '').toString().trim();
-              if (col0 === 'pageTitle' || col0 === 'ページタイトル') {
-                dataStarted = true;
-                return;
-              }
-              if (dataStarted && col0) {
-                const views = toNum(col1);
-                parsedPages.push({
-                  title: col0,
-                  app: classifyPageTitle(col0),
-                  views: views,
-                  source: 'スプレッドシート「ページ別レポート」自動同期'
-                });
-              }
-            });
-            if (parsedPages.length > 0) {
-              return parsedPages;
-            }
-          }
-        }
-      } catch (e) {
-        // 未作成時はnull
-      }
-      return null;
-    }
-
-    function parseGvizSummary(data, config) {
-      let lastUpdated = config.lastUpdated;
-      const parsedRows = [];
-
-      if (data && data.table && data.table.rows) {
-        data.table.rows.forEach(r => {
-          const c = r.c || [];
-          const getVal = (idx) => (c[idx] ? (c[idx].f || c[idx].v || '') : '').toString().trim();
-          const col0 = getVal(0);
-          const col1 = getVal(1);
-
-          if (col0 === '最終更新' && col1) {
-            lastUpdated = col1;
-            return;
-          }
-          if (!col0 || col0 === '国' || col0 === '合計' || col0.includes('GA4要約') || col0.startsWith('※')) {
-            return;
-          }
-
-          const users = toNum(getVal(1));
-          const sessions = toNum(getVal(2));
-          if (users === 0 && sessions === 0) return;
-
-          let rawRate = getVal(4);
-          let rateNum = toNum(rawRate);
-          if (rateNum > 0 && rateNum <= 1 && !rawRate.includes('%')) {
-            rateNum = +(rateNum * 100).toFixed(1);
-          }
-
-          parsedRows.push({
-            country: col0,
-            users: users,
-            sessions: sessions,
-            engaged: toNum(getVal(3)),
-            rate: rateNum,
-            duration: getVal(5) || '0:00',
-            events: toNum(getVal(6)),
-            views: toNum(getVal(7))
-          });
-        });
-      }
-
-      if (parsedRows.length > 0) {
-        return { rows: parsedRows, lastUpdated, fromFallback: false };
-      }
-      return { rows: [...config.fallbackRows], lastUpdated: config.lastUpdated, fromFallback: true };
+    // ニュース統合版のGA4シートIDをブラウザに保存して即時反映
+    function saveNewsSheetId() {
+      const raw = document.getElementById('news-sheet-input').value.trim();
+      if (!raw) return;
+      const match = raw.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      const extractedId = match ? match[1] : raw;
+      localStorage.setItem('news_ga_sheet_id', extractedId);
+      NEWS_GA_SHEET_ID = extractedId;
+      SHEETS_CONFIG.news.sheetId = extractedId;
+      APP_CATEGORIES.news.sheetUrl = `https://docs.google.com/spreadsheets/d/${extractedId}/edit`;
+      loadAllData();
     }
 
     async function loadAllData() {
       const statusEl = document.getElementById('sync-status');
       statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> 同期中...`;
 
-      const [genResult, histResult, muslimCats, dynamicPages] = await Promise.all([
-        fetchSheetSummary('general'),
-        fetchSheetSummary('history'),
-        fetchMuslimArchiveCounts(),
-        fetchPageReportIfExists()
+      const [genResult, histResult, muslimResult, newsResult, muslimCats] = await Promise.all([
+        fetchGAReportSheet('general'),
+        fetchGAReportSheet('history'),
+        fetchGAReportSheet('muslim'),
+        fetchGAReportSheet('news'),
+        fetchMuslimArchiveCounts()
       ]);
 
       appData.general = genResult;
       appData.history = histResult;
+      appData.muslim  = muslimResult;
+      appData.news    = newsResult;
       appData.muslimCategories = muslimCats;
 
-      const histTotal = calcCountrySummary(histResult.rows);
+      const histTotal   = calcCountrySummary(histResult.rows);
+      const muslimTotal = calcCountrySummary(muslimResult.rows);
+      const newsTotal   = calcCountrySummary(newsResult.rows);
       const totalMuslimRecords = muslimCats.reduce((s, c) => s + c.count, 0);
 
-      const basePages = dynamicPages ? dynamicPages : JSON.parse(JSON.stringify(VERIFIED_PAGE_DATA));
-      const histPageIdx = basePages.findIndex(p => p.title.includes('専用スプレッドシート集計'));
-      if (histPageIdx !== -1 && histTotal.views > 0) {
-        basePages[histPageIdx].views = histTotal.views;
-      }
-      const muslimPageIdx = basePages.findIndex(p => p.app === 'muslim');
-      if (muslimPageIdx !== -1) {
-        basePages[muslimPageIdx].source = `本日公開（アクセスデータなし・DB登録 ${totalMuslimRecords} 件）`;
-      }
-      APP_CATEGORIES.muslim.description = `本日公開（全${totalMuslimRecords}件・${muslimCats.length}カテゴリ収録DB）`;
+      // 各シートの最新実測PVをページ一覧データに反映
+      const updatedPages = JSON.parse(JSON.stringify(BASE_PAGE_DATA));
 
-      appData.pages = basePages;
+      const histIdx = updatedPages.findIndex(p => p.title.includes('専用GA4シート集計'));
+      if (histIdx !== -1 && histTotal.views > 0) {
+        updatedPages[histIdx].views = histTotal.views;
+        updatedPages[histIdx].source = `GA4レポート_自分史サイト（${histResult.lastUpdated}）`;
+      }
 
-      if (!genResult.fromFallback || !histResult.fromFallback) {
+      const muslimIdx = updatedPages.findIndex(p => p.app === 'muslim');
+      if (muslimIdx !== -1) {
+        updatedPages[muslimIdx].views = muslimTotal.views;
+        updatedPages[muslimIdx].source = `GA4レポート_ムスリムウォッチ（${muslimResult.lastUpdated} 実行済・記事DB ${totalMuslimRecords}件）`;
+      }
+      APP_CATEGORIES.muslim.description = `GA4実測 ${muslimTotal.views} PV ／ 記事DB ${totalMuslimRecords}件収録`;
+
+      const newsIdx = updatedPages.findIndex(p => p.app === 'news');
+      if (newsIdx !== -1) {
+        updatedPages[newsIdx].views = newsTotal.views;
+        updatedPages[newsIdx].source = newsTotal.views > 0
+          ? `GA4レポート_ニュース統合版（${newsResult.lastUpdated}）`
+          : '専用GA4レポートシート未連携（/hadanonews/ シート作成後に自動反映）';
+      }
+      APP_CATEGORIES.news.description = newsTotal.views > 0
+        ? `GA4実測 ${newsTotal.views} PV（/hadanonews/）`
+        : '専用GA4レポートシート作成待ち';
+
+      appData.pages = updatedPages;
+
+      if (!genResult.fromFallback || !histResult.fromFallback || !muslimResult.fromFallback) {
         statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> スプレッドシート同期済`;
       } else {
         statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-400"></span> 実測データ表示中`;
@@ -637,10 +776,16 @@
 
     function getMergedCountryRows() {
       const map = new Map();
-      const normalizeCountry = (name) => (name === '（未設定）' ? '（国不明）' : name);
+      // 総合管理シート ＋ 自分史シート ＋ ムスリムウォッチシート（＋ニュースシート）を合算
+      const allSheetRows = [
+        ...appData.general.rows,
+        ...appData.history.rows,
+        ...appData.muslim.rows,
+        ...appData.news.rows
+      ];
 
-      [...appData.general.rows, ...appData.history.rows].forEach(r => {
-        const key = normalizeCountry(r.country);
+      allSheetRows.forEach(r => {
+        const key = translateCountryName(r.country);
         if (!map.has(key)) {
           map.set(key, { country: key, users: 0, sessions: 0, engaged: 0, rate: 0, duration: '-', events: 0, views: 0 });
         }
@@ -654,7 +799,7 @@
         if (r.duration && r.duration !== '0:00' && r.duration !== '00:00') {
           item.duration = r.duration;
         } else if (item.duration === '-') {
-          item.duration = '0:00';
+          item.duration = '00:00';
         }
       });
 
@@ -681,51 +826,76 @@
     function renderDashboard() {
       const linkEl = document.getElementById('app-direct-link');
       const sheetLinkEl = document.getElementById('sheet-direct-link');
-      const noticeEl = document.getElementById('notice-banner');
-      const noticeTitleEl = document.getElementById('notice-title');
-      const noticeBodyEl = document.getElementById('notice-body');
+      const newsSetupEl = document.getElementById('news-sheet-setup');
       const muslimDbEl = document.getElementById('muslim-db-section');
       const countryNoteEl = document.getElementById('country-note');
       let countryRows = [];
 
-      const genSum = calcCountrySummary(appData.general.rows);
-      const histSum = calcCountrySummary(appData.history.rows);
+      const genSum    = calcCountrySummary(appData.general.rows);
+      const histSum   = calcCountrySummary(appData.history.rows);
+      const muslimSum = calcCountrySummary(appData.muslim.rows);
+      const newsSum   = calcCountrySummary(appData.news.rows);
       const mergedRows = getMergedCountryRows();
-      const mergedSum = calcCountrySummary(mergedRows);
+      const mergedSum  = calcCountrySummary(mergedRows);
 
       if (currentTab === 'all') {
-        document.getElementById('current-view-title').textContent = '🌐 全5アプリ統合サマリー（スプレッドシート合算実測値）';
-        document.getElementById('last-updated-text').textContent = `総合管理シート最終実行: ${appData.general.lastUpdated} ／ 自分史シート最終更新: ${appData.history.lastUpdated}`;
+        document.getElementById('current-view-title').textContent = '🌐 全5アプリ統合サマリー（GA4レポートシート合算実測値）';
+        document.getElementById('last-updated-text').textContent = `ムスリムシート実行: ${appData.muslim.lastUpdated} ／ 自分史シート更新: ${appData.history.lastUpdated} ／ 総合管理シート実行: ${appData.general.lastUpdated}`;
         document.getElementById('app-comparison-section').classList.remove('hidden');
         document.getElementById('page-breakdown-badge').textContent = '全5アプリ表示';
         linkEl.classList.add('hidden');
         sheetLinkEl.classList.add('hidden');
-        noticeEl.classList.add('hidden');
+        newsSetupEl.classList.add('hidden');
         muslimDbEl.classList.add('hidden');
-        countryNoteEl.textContent = '※2つのGA4スプレッドシートの「要約」シート合算実測値（163 PV + 61 PV = 224 PV）';
+        countryNoteEl.textContent = `※各GA4レポートシート合算実測値（総合163 + 自分史61 + ムスリム${muslimSum.views} = 計${mergedSum.views} PV）`;
         countryRows = mergedRows;
 
         setKpiValues(
-          mergedSum.views, '2シート合計実測PV',
-          mergedSum.users, '2シート合計ユーザー',
-          mergedSum.sessions, '2シート合計セッション',
+          mergedSum.views, '全シート合計実測PV',
+          mergedSum.users, '全シート合計ユーザー',
+          mergedSum.sessions, '全シート合計セッション',
           mergedSum.engaged,
           `${mergedSum.rate}%`,
           mergedSum.events
         );
         renderComparisonCards();
 
+      } else if (currentTab === 'muslim') {
+        const meta = APP_CATEGORIES.muslim;
+        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況（/muslim/）`;
+        document.getElementById('last-updated-text').textContent = `GA4レポート_ムスリムウォッチ 最終実行: ${appData.muslim.lastUpdated}`;
+        document.getElementById('app-comparison-section').classList.add('hidden');
+        document.getElementById('page-breakdown-badge').textContent = 'ムスリム問題ウォッチのみ';
+        linkEl.href = meta.repoUrl;
+        linkEl.classList.remove('hidden');
+        sheetLinkEl.href = meta.sheetUrl;
+        sheetLinkEl.classList.remove('hidden');
+        newsSetupEl.classList.add('hidden');
+        muslimDbEl.classList.remove('hidden');
+
+        countryRows = [...appData.muslim.rows].sort((a, b) => b.sessions - a.sessions);
+        countryNoteEl.textContent = '※「GA4レポート_ムスリムウォッチ」（/muslim/ フィルタ済）の国別実測データ';
+
+        setKpiValues(
+          muslimSum.views, 'ムスリムシート実測PV (日本53)',
+          muslimSum.users, 'ムスリムシート実測ユーザー (日本15)',
+          muslimSum.sessions, 'ムスリムシート実測セッション (日本28)',
+          muslimSum.engaged,
+          `${muslimSum.rate}%`,
+          muslimSum.events
+        );
+
       } else if (currentTab === 'history') {
         const meta = APP_CATEGORIES.history;
         document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況`;
-        document.getElementById('last-updated-text').textContent = `自分史スプレッドシート最終更新: ${appData.history.lastUpdated}`;
+        document.getElementById('last-updated-text').textContent = `GA4レポート_自分史サイト 最終更新: ${appData.history.lastUpdated}`;
         document.getElementById('app-comparison-section').classList.add('hidden');
         document.getElementById('page-breakdown-badge').textContent = '自分史サイトのみ';
         linkEl.href = meta.repoUrl;
         linkEl.classList.remove('hidden');
         sheetLinkEl.href = meta.sheetUrl;
         sheetLinkEl.classList.remove('hidden');
-        noticeEl.classList.add('hidden');
+        newsSetupEl.classList.add('hidden');
         muslimDbEl.classList.add('hidden');
         countryRows = [...appData.history.rows].sort((a, b) => b.sessions - a.sessions);
         countryNoteEl.textContent = '※「GA4レポート_自分史サイト」スプレッドシートの実測データ';
@@ -739,62 +909,48 @@
           histSum.events
         );
 
-      } else if (currentTab === 'muslim') {
-        const meta = APP_CATEGORIES.muslim;
-        const muslimViews = calcAppViews('muslim');
-        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} アーカイブ のアクセス状況`;
-        document.getElementById('last-updated-text').textContent = `公開URL: ${meta.repoUrl} （本日公開・GA4アクセス集計待ち）`;
-        document.getElementById('app-comparison-section').classList.add('hidden');
-        document.getElementById('page-breakdown-badge').textContent = 'ムスリム問題ウォッチのみ';
-        linkEl.href = meta.repoUrl;
-        linkEl.classList.remove('hidden');
-        sheetLinkEl.href = meta.sheetUrl;
-        sheetLinkEl.classList.remove('hidden');
-
-        noticeTitleEl.textContent = 'ℹ️ 「ムスリム問題ウォッチ アーカイブ（muslim）」のアクセス数値について';
-        noticeBodyEl.innerHTML = 'このアプリは<strong>本日作成・公開されたばかりのため、アクセスデータは「0件」</strong>です（ダミー数値は一切含めていません）。<br>※共通の測定ID（<code>G-ZKVVRD15VN</code>）が設定されているため、今後のアクセスは明日以降のGA4レポート更新時に反映されます。下のパネルでは連携スプレッドシートの登録データ内訳（全58件）をご確認いただけます。';
-        noticeEl.classList.remove('hidden');
-        muslimDbEl.classList.remove('hidden');
-
-        countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
-        countryNoteEl.textContent = '※参考：「GA4レポート_総合管理アプリ」共通プロパティ全体の国別データ（2026-11-02時点）';
-
-        setKpiValues(
-          muslimViews, '本日公開（アクセス集計待ち）',
-          '0', '本日公開（データなし）',
-          '0', '本日公開（データなし）',
-          '0',
-          '0.0%',
-          '0'
-        );
-
       } else if (currentTab === 'news') {
         const meta = APP_CATEGORIES.news;
-        const newsViews = calcAppViews('news');
-        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況`;
-        document.getElementById('last-updated-text').textContent = `公開URL: ${meta.repoUrl} （本日公開・GA4アクセス集計待ち）`;
+        document.getElementById('current-view-title').textContent = `${meta.icon} ${meta.name} のアクセス状況（/hadanonews/）`;
+        document.getElementById('last-updated-text').textContent = NEWS_GA_SHEET_ID
+          ? `GA4レポート_ニュース統合版 最終実行: ${appData.news.lastUpdated}`
+          : `公開URL: ${meta.repoUrl} （専用GA4レポートシート未連携）`;
         document.getElementById('app-comparison-section').classList.add('hidden');
         document.getElementById('page-breakdown-badge').textContent = 'ニュース統合版のみ';
         linkEl.href = meta.repoUrl;
         linkEl.classList.remove('hidden');
-        sheetLinkEl.classList.add('hidden');
-
-        noticeTitleEl.textContent = 'ℹ️ 「ニュース統合版（hadanonews）」のアクセス数値について';
-        noticeBodyEl.innerHTML = 'このサイトは<strong>本日公開されたばかりのため、スプレッドシート（昨日までの集計）にはまだアクセス数が記録されていません（0件が正しい状態です）</strong>。<br>※本日のアクセス（ご自身やMuseによる検証アクセス等）は、GA4のリアルタイム画面または明日以降のレポート更新時に反映されます。';
-        noticeEl.classList.remove('hidden');
+        if (meta.sheetUrl) {
+          sheetLinkEl.href = meta.sheetUrl;
+          sheetLinkEl.classList.remove('hidden');
+        } else {
+          sheetLinkEl.classList.add('hidden');
+        }
+        newsSetupEl.classList.remove('hidden');
         muslimDbEl.classList.add('hidden');
 
-        countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
-        countryNoteEl.textContent = '※参考：「GA4レポート_総合管理アプリ」共通プロパティ全体の国別データ（2026-11-02時点）';
-
-        setKpiValues(
-          newsViews, '本日公開（アクセス集計待ち）',
-          '0', '本日公開（データなし）',
-          '0', '本日公開（データなし）',
-          '0',
-          '0.0%',
-          '0'
-        );
+        if (newsSum.views > 0) {
+          countryRows = [...appData.news.rows].sort((a, b) => b.sessions - a.sessions);
+          countryNoteEl.textContent = '※「GA4レポート_ニュース統合版」（/hadanonews/）の実測データ';
+          setKpiValues(
+            newsSum.views, 'ニュースシート実測PV',
+            newsSum.users, 'ニュースシート実測ユーザー',
+            newsSum.sessions, 'ニュースシート実測セッション',
+            newsSum.engaged,
+            `${newsSum.rate}%`,
+            newsSum.events
+          );
+        } else {
+          countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
+          countryNoteEl.textContent = '※参考：専用シート連携前のため「総合管理アプリ」共通プロパティの国別データを表示中';
+          setKpiValues(
+            0, '専用GA4シート作成待ち',
+            0, '専用GA4シート作成待ち',
+            0, '専用GA4シート作成待ち',
+            0,
+            '0.0%',
+            0
+          );
+        }
 
       } else {
         // 総合健康管理 (health) または 財務管理 (finance)
@@ -806,14 +962,15 @@
         document.getElementById('page-breakdown-badge').textContent = `${meta.name} のみ`;
         linkEl.href = meta.repoUrl;
         linkEl.classList.remove('hidden');
-        sheetLinkEl.classList.add('hidden');
-        noticeEl.classList.add('hidden');
+        sheetLinkEl.href = meta.sheetUrl;
+        sheetLinkEl.classList.remove('hidden');
+        newsSetupEl.classList.add('hidden');
         muslimDbEl.classList.add('hidden');
         countryRows = [...appData.general.rows].sort((a, b) => b.sessions - a.sessions);
         countryNoteEl.textContent = '※「GA4レポート_総合管理アプリ」共通プロパティ全体の国別データ';
 
         setKpiValues(
-          appViews, 'GA4ページ別実測PV（7日間）',
+          appViews, 'GA4ページ別実測PV',
           `全体 ${genSum.users}`, '※共通プロパティ全体の実測値',
           `全体 ${genSum.sessions}`, '※共通プロパティ全体の実測値',
           `全体 ${genSum.engaged}`,
@@ -848,7 +1005,21 @@
         const meta = APP_CATEGORIES[key];
         const views = calcAppViews(key);
         const share = Math.round((views / totalViews) * 100);
-        const isPending = (key === 'news' || key === 'muslim') && views === 0;
+        // ★判定ロジック修正：アプリ名で決め打ちせず、実際にviews === 0のときだけ「シート未連携」と表示
+        const isPending = views === 0;
+
+        let subDetail = '';
+        if (key === 'muslim') {
+          const mSum = calcCountrySummary(appData.muslim.rows);
+          const jpRow = appData.muslim.rows.find(r => r.country === '日本');
+          subDetail = jpRow
+            ? `日本: ${jpRow.views} PV / ${jpRow.users}人 / ${jpRow.sessions}回`
+            : `全9カ国: ${mSum.users}人 / ${mSum.sessions}セッション`;
+        } else if (key === 'history') {
+          subDetail = `専用シート61回 ＋ 総合側38回`;
+        } else {
+          subDetail = meta.description;
+        }
 
         return `
           <div onclick="switchTab('${key}')" class="cursor-pointer border border-slate-200 rounded-xl p-3.5 bg-slate-50/60 hover:bg-white hover:shadow-md transition flex flex-col justify-between">
@@ -856,16 +1027,16 @@
               <div class="flex items-center justify-between gap-1 mb-1.5">
                 <span class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1 truncate">${meta.icon} ${meta.name}</span>
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${meta.badgeClass}">
-                  ${isPending ? '本日公開' : `${share}%`}
+                  ${isPending ? 'シート待ち' : `シェア ${share}%`}
                 </span>
               </div>
-              <p class="text-[11px] text-slate-400 mb-3 line-clamp-1">${meta.description}</p>
+              <p class="text-[11px] text-slate-500 mb-3 line-clamp-1">${subDetail}</p>
             </div>
             <div>
               <div class="bg-white p-2.5 rounded-lg border border-slate-100 text-center mb-2.5">
                 <div class="text-[10px] text-slate-400">確認済み表示回数 (PV)</div>
                 <div class="font-bold ${isPending ? 'text-slate-400' : 'text-emerald-600'} text-lg mt-0.5">
-                  ${views} <span class="text-[11px] font-normal">${isPending ? '（未集計）' : '回'}</span>
+                  ${views.toLocaleString()} <span class="text-[11px] font-normal">${isPending ? '（未連携）' : '回'}</span>
                 </div>
               </div>
               <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
@@ -920,7 +1091,7 @@
           <div>
             <div class="flex justify-between text-xs mb-1">
               <span class="font-bold text-slate-700">${flag} ${r.country}</span>
-              <span class="text-slate-500"><strong class="text-slate-800">${r.sessions}</strong> セッション (${pct}%)</span>
+              <span class="text-slate-500"><strong class="text-slate-800">${r.sessions}</strong> セッション / <strong class="text-emerald-600">${r.views}</strong> PV (${pct}%)</span>
             </div>
             <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
               <div class="bg-indigo-500 h-full rounded-full transition-all duration-500" style="width: ${Math.max(pct, 2)}%"></div>
@@ -939,7 +1110,7 @@
             <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${flag} ${r.country}</td>
             <td class="py-3 px-3 text-right font-medium text-slate-700">${r.users}</td>
             <td class="py-3 px-3 text-right font-bold text-indigo-600">${r.sessions}</td>
-            <td class="py-3 px-3 text-right font-medium text-emerald-600">${r.views}</td>
+            <td class="py-3 px-3 text-right font-bold text-emerald-600">${r.views}</td>
             <td class="py-3 px-3 text-right">
               <span class="text-xs px-2 py-0.5 rounded-full font-bold ${r.rate >= 40 ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}">
                 ${r.rate}%
